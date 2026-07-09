@@ -216,3 +216,11 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Reference code library
+reference_code_lib/
+
+# Project-generated outputs
+case/**/result/
+case/**/results/
+case/**/ground_truth/

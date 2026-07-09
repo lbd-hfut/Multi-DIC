@@ -1,0 +1,49 @@
+project:
+  name: CylinderDIC
+  case_root: case/CylinderDIC
+  output_root: results
+
+data:
+  speckle_dir: images
+  calibration_dir: calibrate_images
+  camera_glob: cam_*
+  reference_frame: "001.bmp"
+  deformed_frames:
+    - "002.bmp"
+  image_extensions:
+    - .bmp
+    - .png
+    - .jpg
+    - .jpeg
+    - .tif
+    - .tiff
+
+scale_correction:
+  checkerboard_meta: calibrate_images/chessboard_meta.json
+  square_size: 1.0
+  square_size_unit: mm
+
+dic:
+  subset_radius: 20
+  step: 5
+  search_radius: 30
+  strain_radius: 15
+  cutoff_corrcoef: 0.6
+
+colmap:
+  workspace: colmap
+  camera_model: OPENCV
+  matcher: exhaustive
+
+reconstruction:
+  min_views: 2
+  max_reprojection_error_px: 2.0
+
+output:
+  subdirectories:
+    - logs
+    - sfm
+    - scale
+    - dic2d
+    - recon3d
+    - figures
