@@ -69,6 +69,16 @@ def run_visualize3d(config: MDICConfig) -> dict[str, Any]:
         )
         if not pair_surfaces:
             report["warnings"].append(f"No pair surface npz files found in {cfg['pair_dir']}")
+        else:
+            surface_cloud_dir = figures_dir / "surface_clouds"
+            outputs.update(
+                _plot_pair_surface_cloud_maps(
+                    surface_cloud_dir,
+                    cfg["frame_stem"],
+                    pair_surfaces,
+                    cfg,
+                )
+            )
         outputs["reference_points_ply"] = str(
             _write_reference_points_ply(
                 figures_dir / f"{cfg['frame_stem']}_reference_points.ply",
@@ -85,6 +95,7 @@ def run_visualize3d(config: MDICConfig) -> dict[str, Any]:
             "num_points_valid": int(np.count_nonzero(valid)),
             "num_pair_surfaces": int(len(pair_surfaces)),
             "num_surface_samples": int(len(surface_points)),
+            "num_surface_cloud_faces": int(_count_valid_pair_surface_faces(pair_surfaces)),
             "displacement_norm": _array_stats(disp_norm[valid]),
         }
         report["ok"] = True
@@ -388,6 +399,157 @@ def _plot_displacement_components_scatter(
     fig.savefig(path)
     plt.close(fig)
     return path
+
+
+def _plot_pair_surface_cloud_maps(
+    output_dir: Path,
+    frame_stem: str,
+    pair_surfaces: list[dict[str, np.ndarray]],
+    cfg: dict[str, Any],
+) -> dict[str, str]:
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+
+    patches = _collect_pair_surface_patches(pair_surfaces)
+    if not patches:
+        return {}
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    all_points = np.concatenate([points for points, _, _ in patches], axis=0)
+    mins = np.nanmin(all_points, axis=0)
+    maxs = np.nanmax(all_points, axis=0)
+    center = (mins + maxs) * 0.5
+    radius = max(float(np.nanmax(maxs - mins)) * 0.55, 1.0e-9)
+
+    fields = {
+        "surface_cloud_morphology": {
+            "title": "3D morphology cloud map",
+            "label": "Z",
+            "filename": f"{frame_stem}_surface_cloud_morphology.png",
+            "cmap": "viridis",
+            "signed": False,
+            "getter": lambda points, displacement: points[:, 2],
+        },
+        "surface_cloud_displacement_total": {
+            "title": "Total displacement cloud map",
+            "label": "|U|",
+            "filename": f"{frame_stem}_surface_cloud_displacement_total.png",
+            "cmap": "plasma",
+            "signed": False,
+            "getter": lambda points, displacement: np.linalg.norm(displacement, axis=1),
+        },
+        "surface_cloud_displacement_ux": {
+            "title": "Ux displacement cloud map",
+            "label": "Ux",
+            "filename": f"{frame_stem}_surface_cloud_displacement_ux.png",
+            "cmap": "coolwarm",
+            "signed": True,
+            "getter": lambda points, displacement: displacement[:, 0],
+        },
+        "surface_cloud_displacement_uy": {
+            "title": "Uy displacement cloud map",
+            "label": "Uy",
+            "filename": f"{frame_stem}_surface_cloud_displacement_uy.png",
+            "cmap": "coolwarm",
+            "signed": True,
+            "getter": lambda points, displacement: displacement[:, 1],
+        },
+        "surface_cloud_displacement_uz": {
+            "title": "Uz displacement cloud map",
+            "label": "Uz",
+            "filename": f"{frame_stem}_surface_cloud_displacement_uz.png",
+            "cmap": "coolwarm",
+            "signed": True,
+            "getter": lambda points, displacement: displacement[:, 2],
+        },
+    }
+
+    outputs: dict[str, str] = {}
+    for key, spec in fields.items():
+        values = [
+            spec["getter"](points, displacement)[faces].mean(axis=1)
+            for points, displacement, faces in patches
+        ]
+        merged = np.concatenate(values, axis=0)
+        norm = Normalize(*_surface_cloud_color_limits(merged, signed=bool(spec["signed"])))
+        cmap = plt.get_cmap(str(spec["cmap"]))
+
+        fig = plt.figure(figsize=(9.2, 7.4), dpi=int(cfg["dpi"]))
+        ax = fig.add_subplot(111, projection="3d")
+        for points, displacement, faces in patches:
+            point_values = spec["getter"](points, displacement)
+            face_values = point_values[faces].mean(axis=1)
+            collection = Poly3DCollection(
+                points[faces],
+                facecolors=cmap(norm(face_values)),
+                edgecolors="none",
+                linewidths=0.0,
+                alpha=1.0,
+            )
+            ax.add_collection3d(collection)
+
+        ax.set_title(str(spec["title"]))
+        ax.set_xlabel("World X")
+        ax.set_ylabel("World Y")
+        ax.set_zlabel("World Z")
+        ax.view_init(elev=float(cfg["view_elev"]), azim=float(cfg["view_azim"]))
+        ax.set_xlim(center[0] - radius, center[0] + radius)
+        ax.set_ylim(center[1] - radius, center[1] + radius)
+        ax.set_zlim(center[2] - radius, center[2] + radius)
+        ax.grid(True, color="#d0d7de", linewidth=0.5, alpha=0.8)
+        mappable = plt.cm.ScalarMappable(norm=norm, cmap=cmap)
+        mappable.set_array([])
+        cbar = fig.colorbar(mappable, ax=ax, shrink=0.72, pad=0.08)
+        cbar.set_label(str(spec["label"]))
+        fig.tight_layout()
+        path = output_dir / str(spec["filename"])
+        fig.savefig(path)
+        plt.close(fig)
+        outputs[key] = str(path)
+    return outputs
+
+
+def _collect_pair_surface_patches(
+    pair_surfaces: list[dict[str, np.ndarray]],
+) -> list[tuple[np.ndarray, np.ndarray, np.ndarray]]:
+    patches: list[tuple[np.ndarray, np.ndarray, np.ndarray]] = []
+    for surface in pair_surfaces:
+        points = np.asarray(surface["points_ref_world"], dtype=np.float64)
+        displacement = np.asarray(surface["displacement_world"], dtype=np.float64)
+        faces = np.asarray(surface["faces"], dtype=np.int32)
+        valid_faces = np.asarray(surface["valid_faces"], dtype=bool)
+        valid_points = np.asarray(surface.get("valid_points", np.ones(len(points), dtype=bool)), dtype=bool)
+        if "outlier_filter_keep" in surface:
+            valid_points &= np.asarray(surface["outlier_filter_keep"], dtype=bool)
+        finite_points = np.all(np.isfinite(points), axis=1) & np.all(np.isfinite(displacement), axis=1)
+        valid_points &= finite_points
+        keep_faces = valid_faces & np.all(valid_points[faces], axis=1)
+        if np.any(keep_faces):
+            patches.append((points, displacement, faces[keep_faces]))
+    return patches
+
+
+def _surface_cloud_color_limits(values: np.ndarray, signed: bool) -> tuple[float, float]:
+    values = np.asarray(values, dtype=np.float64)
+    values = values[np.isfinite(values)]
+    if values.size == 0:
+        return (-1.0, 1.0) if signed else (0.0, 1.0)
+    if signed:
+        bound = float(np.nanpercentile(np.abs(values), 98))
+        bound = max(bound, 1.0e-12)
+        return -bound, bound
+    vmin, vmax = np.nanpercentile(values, [2, 98])
+    if vmax - vmin <= 1.0e-12:
+        center = 0.5 * float(vmin + vmax)
+        return center - 0.1, center + 0.1
+    return float(vmin), float(vmax)
+
+
+def _count_valid_pair_surface_faces(pair_surfaces: list[dict[str, np.ndarray]]) -> int:
+    return sum(faces.shape[0] for _, _, faces in _collect_pair_surface_patches(pair_surfaces))
 
 
 def _interpolate_cylinder_surface_fields(

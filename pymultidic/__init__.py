@@ -3,6 +3,7 @@
 from .api import (
     MDICConfig,
     STEP_NAMES,
+    build_config,
     load_config,
     run_dic2d,
     run_mask,
@@ -16,12 +17,13 @@ from .api import (
     validate_project,
 )
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 __all__ = [
     "MDICConfig",
     "STEP_NAMES",
     "__version__",
+    "build_config",
     "load_config",
     "run_dic2d",
     "run_mask",
@@ -34,4 +36,3 @@ __all__ = [
     "run_visualize3d",
     "validate_project",
 ]
-

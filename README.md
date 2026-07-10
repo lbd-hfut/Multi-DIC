@@ -1,41 +1,109 @@
-# Multi-DIC
+# PyMultiDIC
 
-Multi-DIC is a config-driven, calibration-free multi-view DIC workflow. The
-current SfM/self-calibration stage uses the official `pycolmap` Python package
-with a pinned version for reproducibility.
+PyMultiDIC is a Python-first multi-view digital image correlation workflow. It
+wraps the full solving process as public Python API calls under
+`pymultidic.<function_name>` while keeping native C++ acceleration for the
+expensive Ncorr-style 2D DIC and 3D reconstruction stages.
 
-## Quick Start
+The project can be used in two ways:
+
+- Install the released package with `pip install pymultidic` and call the API.
+- Build the repository locally, including the native C++ components under
+  `native/`, then run the same API from source.
+
+The full user manual is available here:
+[docs/pymultidic_usage_en.pdf](docs/pymultidic_usage_en.pdf).
+
+## Example Results
+
+The bundled `case/CylinderDIC` example was solved through the Python API. A
+small set of representative result files is stored under
+[docs/results/cylinderdic](docs/results/cylinderdic).
+
+**3D morphology cloud map**
+
+![3D morphology cloud map](docs/results/cylinderdic/surface_cloud_morphology.png)
+
+**Total 3D displacement cloud map**
+
+![Total displacement cloud map](docs/results/cylinderdic/surface_cloud_displacement_total.png)
+
+**Displacement component cloud maps**
+
+| Ux | Uy | Uz |
+| --- | --- | --- |
+| ![Ux displacement](docs/results/cylinderdic/surface_cloud_displacement_ux.png) | ![Uy displacement](docs/results/cylinderdic/surface_cloud_displacement_uy.png) | ![Uz displacement](docs/results/cylinderdic/surface_cloud_displacement_uz.png) |
+
+Additional copied outputs:
+
+- [docs/results/cylinderdic/recon3d_002.ply](docs/results/cylinderdic/recon3d_002.ply)
+- [docs/results/cylinderdic/recon3d_report.json](docs/results/cylinderdic/recon3d_report.json)
+- [docs/results/cylinderdic/pipeline_report.json](docs/results/cylinderdic/pipeline_report.json)
+
+For this example, the 3D reconstruction report records 3,695 valid 3D points
+after 3D outlier cleaning and uses the `native_recon3d` backend.
+
+## Install From PyPI
 
 ```bash
-~/.local/bin/micromamba create -y -f environment.yml
-~/.local/bin/micromamba run -n multi-dic python -m pip install -e .
-~/.local/bin/micromamba run -n multi-dic python -m pymultidic run --config configs/MDIC.yaml --step validate
-~/.local/bin/micromamba run -n multi-dic python -m pymultidic run --config configs/MDIC.yaml --step sfm
-~/.local/bin/micromamba run -n multi-dic python -m pymultidic run --config configs/MDIC.yaml --step scale
-~/.local/bin/micromamba run -n multi-dic python -m pymultidic run --config configs/MDIC.yaml --step mask
-~/.local/bin/micromamba run -n multi-dic python -m pymultidic run --config configs/MDIC.yaml --step dic2d
-~/.local/bin/micromamba run -n multi-dic python -m pymultidic run --config configs/MDIC.yaml --step recon3d
+pip install pymultidic
 ```
 
-`reference_code_lib/` is only used as local reference source code. The formal
-project implementation lives in the repository root.
-
-The same flow can be called from Python:
+Then call the package from Python:
 
 ```python
 import pymultidic
 
 config = pymultidic.load_config("configs/MDIC.yaml")
-pymultidic.run_pipeline(config, steps=["validate", "sfm", "scale", "mask", "dic2d", "recon3d"])
+report = pymultidic.run_pipeline(
+    config,
+    steps=["validate", "sfm", "scale", "mask", "dic2d", "recon3d", "visualize3d"],
+)
 ```
 
-## Native Build
+You can also call the API without a YAML file. In direct-input mode,
+`case_root` is required and the remaining paths and numerical parameters use
+PyMultiDIC defaults unless overridden:
 
-The native C++ components can be built from WSL through the top-level
-`native/CMakeLists.txt`. One configure/build pass produces the Ncorr library and
-CLI plus the Recon3D pybind11 extension:
+```python
+import pymultidic
+
+report = pymultidic.run_pipeline(
+    case_root="case/CylinderDIC",
+    project_name="CylinderDIC",
+    steps=["validate", "sfm", "scale", "mask", "dic2d", "recon3d", "visualize3d"],
+    subset_radius=25,
+    subset_spacing=6,
+    min_corrcoef=0.6,
+)
+```
+
+If an `MDICConfig` object is supplied, it has priority and later keyword
+arguments are ignored:
+
+```python
+config = pymultidic.load_config("configs/MDIC.yaml")
+pymultidic.run_dic2d(config, subset_radius=99)  # uses the config value
+```
+
+## Local Native C++ Build
+
+Use this route when developing the repository, changing files under `native/`,
+or validating native builds before publishing wheels. The top-level
+[native/CMakeLists.txt](native/CMakeLists.txt) builds the native components in
+one configure/build pass:
+
+- `native_ncorr` / `libnative_ncorr.a`
+- `ncorr_cli`
+- `native_recon3d` pybind11 extension
+
+WSL / Linux example:
 
 ```bash
+sudo apt-get update
+sudo apt-get install -y build-essential cmake ninja-build python3-dev python3-pip
+python3 -m pip install -U pybind11 scikit-build-core
+
 cmake -S native -B build/wsl-native -G Ninja \
   -DPYBIND11_FINDPYTHON=ON \
   -DPython_EXECUTABLE=/usr/bin/python3 \
@@ -43,99 +111,125 @@ cmake -S native -B build/wsl-native -G Ninja \
 cmake --build build/wsl-native
 ```
 
-Expected outputs include:
+Expected WSL/Linux outputs:
 
-- `build/wsl-native/ncorr/libnative_ncorr.a`
-- `build/wsl-native/ncorr/ncorr_cli`
-- `build/wsl-native/recon3d/native_recon3d*.so`
-
-## COLMAP Backend
-
-The COLMAP stage is selected in `configs/MDIC.yaml`:
-
-```yaml
-colmap:
-  backend: pycolmap
-  workspace: colmap
-  camera_model: SIMPLE_RADIAL
-  matcher: exhaustive
-  use_gpu: false
-  overwrite: true
+```text
+build/wsl-native/ncorr/libnative_ncorr.a
+build/wsl-native/ncorr/ncorr_cli
+build/wsl-native/recon3d/native_recon3d*.so
 ```
 
-The project pins `pycolmap==4.1.0` in both `environment.yml` and
-`pyproject.toml` to reduce interface drift. SfM results are written under the
-case result directory. Following the NDeF-DIC style, each camera folder's first
-speckle image is copied into a flat `colmap_images/` directory before running
-COLMAP. Example outputs:
+Windows example from a Developer PowerShell with CMake and Ninja available:
 
-- `case/CylinderDIC/results/logs/sfm_report.json`
-- `case/CylinderDIC/results/sfm/colmap/colmap.db`
-- `case/CylinderDIC/results/sfm/colmap/colmap_images/`
-- `case/CylinderDIC/results/sfm/colmap/colmap_sfm/`
-- `case/CylinderDIC/results/sfm/colmap/cameras.npz`
-- `case/CylinderDIC/results/sfm/colmap/cameras.mat`
-- `case/CylinderDIC/results/sfm/colmap/sparse_points.npz`
-- `case/CylinderDIC/results/sfm/colmap/points3D.mat`
-- `case/CylinderDIC/results/sfm/colmap/observations.npz`
-- `case/CylinderDIC/results/sfm/colmap/sparse_scene.png`
+```powershell
+python -m pip install -U pybind11 scikit-build-core cmake ninja
+cmake -S native -B build/windows-native -G Ninja -DPYBIND11_FINDPYTHON=ON
+cmake --build build/windows-native
+```
 
-## Scale Correction
+Expected Windows outputs include:
 
-The `scale` step follows the NDeF-DIC `sfm2world` chessboard workflow. It reads
-`cameras.npz`, detects chessboard inner corners in `calibrate_images/cam_*`,
-triangulates the board corners, and estimates the physical scale:
+```text
+build/windows-native/ncorr/ncorr_cli.exe
+build/windows-native/recon3d/native_recon3d*.pyd
+```
 
-- `case/CylinderDIC/results/scale/sfm2world_scale.json`
-- `case/CylinderDIC/results/scale/chessboard_triangulation.npz`
-- `case/CylinderDIC/results/scale/detections/`
+After the native build, install the Python package locally:
 
-## ROI Masks
+```bash
+python -m pip install -e .
+python run.py --config configs/MDIC.yaml
+```
 
-The `mask` step follows the NDeF-DIC automatic ROI workflow. If
-`mask.user_mask_dir` contains one mask for every registered camera, those masks
-are used directly. Otherwise, Multi-DIC builds masks from SfM observations and
-reference-image speckle texture:
+## Public API
 
-- `case/CylinderDIC/results/logs/mask_report.json`
-- `case/CylinderDIC/results/masks/mask/`
-- `case/CylinderDIC/results/masks/overlay/`
-- `case/CylinderDIC/results/masks/debug/`
-- `case/CylinderDIC/results/masks/auto_roi_meta.json`
-- `case/CylinderDIC/results/masks/auto_roi_summary.png`
+Core API functions:
 
-## 3D Reconstruction
+- `pymultidic.load_config(config_path, workspace_root=None)`
+- `pymultidic.build_config(config=None, *, case_root=None, ...)`
+- `pymultidic.validate_project(config=None, **kwargs)`
+- `pymultidic.run_validate(config=None, **kwargs)`
+- `pymultidic.run_sfm(config=None, **kwargs)`
+- `pymultidic.run_scale(config=None, **kwargs)`
+- `pymultidic.run_mask(config=None, **kwargs)`
+- `pymultidic.run_dic2d(config=None, **kwargs)`
+- `pymultidic.run_recon3d(config=None, **kwargs)`
+- `pymultidic.run_visualize3d(config=None, **kwargs)`
+- `pymultidic.run_step(config_or_step=None, step=None, **kwargs)`
+- `pymultidic.run_pipeline(config=None, steps=None, stop_on_error=True, **kwargs)`
 
-The `recon3d` step uses SfM track ids as cross-camera anchors. It samples each
-camera's DIC2D displacement field at the COLMAP observation, triangulates the
-reference and deformed positions, and exports sparse 3D displacement points:
+See [docs/pymultidic_usage_en.pdf](docs/pymultidic_usage_en.pdf) for the full
+function-by-function parameter reference, return values, and examples.
 
-- `case/CylinderDIC/results/logs/recon3d_report.json`
-- `case/CylinderDIC/results/recon3d/recon3d_002.npz`
-- `case/CylinderDIC/results/recon3d/recon3d_002.ply`
-- `case/CylinderDIC/results/recon3d/qc/002/*_hist.png`
-- `case/CylinderDIC/results/recon3d/qc/002/*_colored.ply`
-- `case/CylinderDIC/results/recon3d/qc/002/*_vectors.ply`
+## Workflow
 
-If the optional `native_recon3d` pybind11 module is available, it is used for
-the expensive interpolation and triangulation loop. Otherwise the workflow uses
-the same NumPy implementation.
+```mermaid
+flowchart TD
+    A["Case folder<br/>camera images and calibration images"] --> B["validate<br/>check inputs and output folders"]
+    B --> C["sfm<br/>camera geometry, sparse points, observations"]
+    C --> D["scale<br/>checkerboard world-scale correction"]
+    C --> E["mask<br/>ROI masks from user masks or automatic logic"]
+    D --> F["dic2d<br/>native ncorr per-camera 2D DIC"]
+    E --> F
+    F --> G["recon3d<br/>triangulated 3D displacement and pair surfaces"]
+    G --> H["visualize3d<br/>morphology and displacement cloud maps"]
+    H --> I["reports, npz, ply, png results"]
+```
 
-Recon3D also writes QC statistics and figures for displacement norm,
-reprojection error, DIC correlation, view count, and per-camera contribution.
-After triangulation, Recon3D applies a configurable 3D outlier filter to remove
-large isolated reconstructed points based on robust position-radius and
-displacement-norm MAD thresholds. The filter updates the valid masks and records
-removed counts in `recon3d_report.json`.
+Manual step-by-step control:
 
-Recon3D additionally exports MultiDIC-style pair surfaces under
-`case/CylinderDIC/results/recon3d/pairs/<frame>/`. By default
-`recon3d.pairs.mode: auto_spatial` orders cameras from `camera_centers_world`.
-Circular layouts are connected with wrap; non-circular layouts only connect
-spatial neighbors without forcing the two ends into a pair. This can be
-overridden in `configs/MDIC.yaml` with `recon3d.pairs.mode: manual`.
+```python
+import pymultidic
 
-MultiDIC-style post-processing for each pair is written under
-`case/CylinderDIC/results/recon3d/post/<frame>/`. It includes raw 3D
-displacement, rigid-body-motion-removed displacement (`ARBM`), rigid transform
-parameters, face centroids, face correlation, and face isotropy.
+config = pymultidic.build_config(
+    case_root="case/CylinderDIC",
+    project_name="CylinderDIC",
+    subset_radius=25,
+    subset_spacing=6,
+    min_corrcoef=0.6,
+)
+
+for step in ["validate", "sfm", "scale", "mask", "dic2d", "recon3d", "visualize3d"]:
+    report = pymultidic.run_step(config, step)
+    if not report.get("ok"):
+        raise RuntimeError(f"{step} failed: {report}")
+```
+
+## Output Layout
+
+By default, results are written under `<case_root>/<output_root>`. For the
+bundled example this is `case/CylinderDIC/results`.
+
+Common output folders:
+
+- `logs/`: JSON reports for each step and the full pipeline.
+- `sfm/colmap/`: camera models, sparse points, observations, and COLMAP files.
+- `scale/`: checkerboard scale correction outputs.
+- `masks/`: ROI masks, overlays, and debug images.
+- `dic2d/`: per-camera/per-frame DIC2D `.npz` outputs.
+- `recon3d/`: global 3D reconstruction `.npz` and `.ply` files.
+- `recon3d/pairs/<frame>/`: MultiDIC-style pair surface meshes.
+- `recon3d/post/<frame>/`: pair-surface post-processing results.
+- `figures/`: 3D visualization outputs.
+- `figures/surface_clouds/`: morphology, total displacement, and Ux/Uy/Uz
+  cloud maps.
+
+Programmatic access to visualization outputs:
+
+```python
+vis_report = pymultidic.run_visualize3d(config)
+outputs = vis_report["outputs"]
+
+print(outputs["surface_cloud_morphology"])
+print(outputs["surface_cloud_displacement_total"])
+print(outputs["surface_cloud_displacement_ux"])
+print(outputs["surface_cloud_displacement_uy"])
+print(outputs["surface_cloud_displacement_uz"])
+```
+
+## Reference Source
+
+`reference_code_lib/` is kept as local reference source code. The formal
+PyMultiDIC implementation lives in the repository root, the `pymultidic/`
+package, the `multidic/` implementation modules, and the native C++ projects
+under `native/`.

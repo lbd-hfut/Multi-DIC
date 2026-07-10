@@ -1,0 +1,570 @@
+{
+  "ok": true,
+  "project": "CylinderDIC",
+  "method": "sfm_track_anchored",
+  "backend": "native_recon3d",
+  "sfm_dir": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\sfm\\colmap",
+  "dic2d_dir": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\dic2d",
+  "output_dir": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d",
+  "frames": [
+    {
+      "ok": true,
+      "frame": "002.bmp",
+      "output_npz": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\recon3d_002.npz",
+      "output_ply": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\recon3d_002.ply",
+      "num_tracks_total": 3763,
+      "num_tracks_valid": 3695,
+      "valid_ratio": 0.9819293117193728,
+      "scale": 179.095901024378,
+      "min_views": 2,
+      "min_corrcoef": 0.6,
+      "max_reprojection_error_px": 2.0,
+      "mean_views": 3.023004059539919,
+      "mean_corrcoef": 0.8494806341977252,
+      "median_displacement_norm": 0.5591090543027304,
+      "outlier_filter": {
+        "enabled": true,
+        "initial_valid": 3701,
+        "removed": 6,
+        "final_valid": 3695,
+        "removed_ratio": 0.0016211834639286678
+      },
+      "qc": {
+        "displacement_norm": {
+          "count": 3695,
+          "mean": 0.5594091553203904,
+          "std": 0.013513846939157264,
+          "min": 0.4914415099923796,
+          "p05": 0.5388801797635471,
+          "p25": 0.5511330433623581,
+          "median": 0.5591090543027304,
+          "p75": 0.5674184276455707,
+          "p95": 0.5807711716823744,
+          "max": 0.6331590233691613
+        },
+        "reprojection_error_ref": {
+          "count": 3695,
+          "mean": 0.32267130250730813,
+          "std": 0.20908620785461934,
+          "min": 0.00024348598542635436,
+          "p05": 0.08410365917418454,
+          "p25": 0.1823401996368415,
+          "median": 0.27729667799909713,
+          "p75": 0.4043191879464233,
+          "p95": 0.7219604804730677,
+          "max": 1.9624020623181009
+        },
+        "reprojection_error_def": {
+          "count": 3695,
+          "mean": 0.32469172220213904,
+          "std": 0.20953739375918762,
+          "min": 0.00029246871736116466,
+          "p05": 0.08731859954579586,
+          "p25": 0.18258676924655876,
+          "median": 0.280230358858142,
+          "p75": 0.4110705718007376,
+          "p95": 0.718907029012799,
+          "max": 1.9438152043903916
+        },
+        "mean_corrcoef": {
+          "count": 3695,
+          "mean": 0.8494806341977252,
+          "std": 0.03666565258524862,
+          "min": 0.748371510046469,
+          "p05": 0.7925193851019489,
+          "p25": 0.8206986466623675,
+          "median": 0.8473290905860212,
+          "p75": 0.8790210559536163,
+          "p95": 0.9103866952074791,
+          "max": 0.9579996827112766
+        },
+        "num_views": {
+          "count": 3695,
+          "mean": 3.023004059539919,
+          "std": 0.3540007778632261,
+          "min": 2.0,
+          "p05": 3.0,
+          "p25": 3.0,
+          "median": 3.0,
+          "p75": 3.0,
+          "p95": 4.0,
+          "max": 5.0
+        },
+        "num_views_histogram": {
+          "2": 176,
+          "3": 3272,
+          "4": 233,
+          "5": 14
+        },
+        "camera_contributions": [
+          {
+            "cam_id": 0,
+            "cam_name": "cam_0",
+            "observed_tracks": 954,
+            "valid_reconstructed_tracks": 936,
+            "valid_ratio": 0.9811320754716981
+          },
+          {
+            "cam_id": 1,
+            "cam_name": "cam_1",
+            "observed_tracks": 948,
+            "valid_reconstructed_tracks": 930,
+            "valid_ratio": 0.9810126582278481
+          },
+          {
+            "cam_id": 2,
+            "cam_name": "cam_2",
+            "observed_tracks": 994,
+            "valid_reconstructed_tracks": 972,
+            "valid_ratio": 0.9778672032193159
+          },
+          {
+            "cam_id": 3,
+            "cam_name": "cam_3",
+            "observed_tracks": 1016,
+            "valid_reconstructed_tracks": 994,
+            "valid_ratio": 0.9783464566929134
+          },
+          {
+            "cam_id": 4,
+            "cam_name": "cam_4",
+            "observed_tracks": 1011,
+            "valid_reconstructed_tracks": 988,
+            "valid_ratio": 0.9772502472799208
+          },
+          {
+            "cam_id": 5,
+            "cam_name": "cam_5",
+            "observed_tracks": 983,
+            "valid_reconstructed_tracks": 964,
+            "valid_ratio": 0.9806714140386572
+          },
+          {
+            "cam_id": 6,
+            "cam_name": "cam_6",
+            "observed_tracks": 980,
+            "valid_reconstructed_tracks": 959,
+            "valid_ratio": 0.9785714285714285
+          },
+          {
+            "cam_id": 7,
+            "cam_name": "cam_7",
+            "observed_tracks": 973,
+            "valid_reconstructed_tracks": 956,
+            "valid_ratio": 0.9825282631038027
+          },
+          {
+            "cam_id": 8,
+            "cam_name": "cam_8",
+            "observed_tracks": 969,
+            "valid_reconstructed_tracks": 954,
+            "valid_ratio": 0.9845201238390093
+          },
+          {
+            "cam_id": 9,
+            "cam_name": "cam_9",
+            "observed_tracks": 964,
+            "valid_reconstructed_tracks": 956,
+            "valid_ratio": 0.991701244813278
+          },
+          {
+            "cam_id": 10,
+            "cam_name": "cam_10",
+            "observed_tracks": 953,
+            "valid_reconstructed_tracks": 943,
+            "valid_ratio": 0.9895068205666316
+          },
+          {
+            "cam_id": 11,
+            "cam_name": "cam_11",
+            "observed_tracks": 922,
+            "valid_reconstructed_tracks": 912,
+            "valid_ratio": 0.9891540130151844
+          }
+        ]
+      },
+      "qc_outputs": {
+        "displacement_norm_histogram": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\qc\\002\\002_displacement_norm_hist.png",
+        "reprojection_error_histogram": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\qc\\002\\002_reprojection_error_hist.png",
+        "corrcoef_histogram": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\qc\\002\\002_corrcoef_hist.png",
+        "num_views_histogram": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\qc\\002\\002_num_views_hist.png",
+        "camera_contributions": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\qc\\002\\002_camera_contributions.png",
+        "points_ref_colored_ply": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\qc\\002\\002_points_ref_colored.ply",
+        "displacement_vectors_ply": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\qc\\002\\002_displacement_vectors.ply"
+      },
+      "pair_selection": {
+        "mode": "auto_spatial",
+        "pairs": [
+          [
+            "cam_5",
+            "cam_4"
+          ],
+          [
+            "cam_4",
+            "cam_3"
+          ],
+          [
+            "cam_3",
+            "cam_2"
+          ],
+          [
+            "cam_2",
+            "cam_1"
+          ],
+          [
+            "cam_1",
+            "cam_0"
+          ],
+          [
+            "cam_0",
+            "cam_11"
+          ],
+          [
+            "cam_11",
+            "cam_10"
+          ],
+          [
+            "cam_10",
+            "cam_9"
+          ],
+          [
+            "cam_9",
+            "cam_8"
+          ],
+          [
+            "cam_8",
+            "cam_7"
+          ],
+          [
+            "cam_7",
+            "cam_6"
+          ],
+          [
+            "cam_6",
+            "cam_5"
+          ]
+        ],
+        "spatial_order": [
+          "cam_5",
+          "cam_4",
+          "cam_3",
+          "cam_2",
+          "cam_1",
+          "cam_0",
+          "cam_11",
+          "cam_10",
+          "cam_9",
+          "cam_8",
+          "cam_7",
+          "cam_6"
+        ],
+        "circularity": 0.956800177483888,
+        "is_circular": true,
+        "median_adjacent_distance": 1.9418196929808997,
+        "wrap_distance": 1.9462469170044754,
+        "wrap_distance_ratio": 1.002279935691032,
+        "median_adjacent_shared_tracks": 626.0,
+        "wrap_shared_tracks": 611,
+        "thresholds": {
+          "auto_circularity_threshold": 0.45,
+          "auto_wrap_distance_ratio": 1.8,
+          "auto_wrap_min_shared_ratio": 0.35,
+          "auto_max_neighbor_distance_ratio": 2.0,
+          "auto_min_shared_tracks": 20
+        }
+      },
+      "pair_surfaces": [
+        {
+          "pair_index": 0,
+          "camera_pair": [
+            "cam_5",
+            "cam_4"
+          ],
+          "output_npz": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\pairs\\002\\pair_cam_5_cam_4_002.npz",
+          "output_ply": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\pairs\\002\\pair_cam_5_cam_4_002.ply",
+          "post_npz": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\post\\002\\pair_cam_5_cam_4_002_post.npz",
+          "num_points": 619,
+          "num_valid_points": 619,
+          "num_faces": 1107,
+          "num_valid_faces": 1107,
+          "outlier_filter": {
+            "enabled": true,
+            "initial_valid": 619,
+            "removed": 0,
+            "final_valid": 619,
+            "removed_ratio": 0.0
+          },
+          "mean_corr_comb": 0.8220772366458002,
+          "median_displacement_arbm_norm": 0.14723544001724362,
+          "median_Eeq": 0.005012974530543855
+        },
+        {
+          "pair_index": 1,
+          "camera_pair": [
+            "cam_4",
+            "cam_3"
+          ],
+          "output_npz": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\pairs\\002\\pair_cam_4_cam_3_002.npz",
+          "output_ply": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\pairs\\002\\pair_cam_4_cam_3_002.ply",
+          "post_npz": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\post\\002\\pair_cam_4_cam_3_002_post.npz",
+          "num_points": 635,
+          "num_valid_points": 635,
+          "num_faces": 1142,
+          "num_valid_faces": 1142,
+          "outlier_filter": {
+            "enabled": true,
+            "initial_valid": 635,
+            "removed": 0,
+            "final_valid": 635,
+            "removed_ratio": 0.0
+          },
+          "mean_corr_comb": 0.8237796686424518,
+          "median_displacement_arbm_norm": 0.14262468819619398,
+          "median_Eeq": 0.004922584061651489
+        },
+        {
+          "pair_index": 2,
+          "camera_pair": [
+            "cam_3",
+            "cam_2"
+          ],
+          "output_npz": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\pairs\\002\\pair_cam_3_cam_2_002.npz",
+          "output_ply": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\pairs\\002\\pair_cam_3_cam_2_002.ply",
+          "post_npz": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\post\\002\\pair_cam_3_cam_2_002_post.npz",
+          "num_points": 588,
+          "num_valid_points": 588,
+          "num_faces": 1070,
+          "num_valid_faces": 1070,
+          "outlier_filter": {
+            "enabled": true,
+            "initial_valid": 588,
+            "removed": 0,
+            "final_valid": 588,
+            "removed_ratio": 0.0
+          },
+          "mean_corr_comb": 0.8217154197109986,
+          "median_displacement_arbm_norm": 0.15484113935143642,
+          "median_Eeq": 0.005008403858721211
+        },
+        {
+          "pair_index": 3,
+          "camera_pair": [
+            "cam_2",
+            "cam_1"
+          ],
+          "output_npz": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\pairs\\002\\pair_cam_2_cam_1_002.npz",
+          "output_ply": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\pairs\\002\\pair_cam_2_cam_1_002.ply",
+          "post_npz": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\post\\002\\pair_cam_2_cam_1_002_post.npz",
+          "num_points": 601,
+          "num_valid_points": 601,
+          "num_faces": 1096,
+          "num_valid_faces": 1096,
+          "outlier_filter": {
+            "enabled": true,
+            "initial_valid": 601,
+            "removed": 0,
+            "final_valid": 601,
+            "removed_ratio": 0.0
+          },
+          "mean_corr_comb": 0.8217765567033882,
+          "median_displacement_arbm_norm": 0.1436862651485481,
+          "median_Eeq": 0.0048441792817060965
+        },
+        {
+          "pair_index": 4,
+          "camera_pair": [
+            "cam_1",
+            "cam_0"
+          ],
+          "output_npz": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\pairs\\002\\pair_cam_1_cam_0_002.npz",
+          "output_ply": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\pairs\\002\\pair_cam_1_cam_0_002.ply",
+          "post_npz": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\post\\002\\pair_cam_1_cam_0_002_post.npz",
+          "num_points": 567,
+          "num_valid_points": 567,
+          "num_faces": 1027,
+          "num_valid_faces": 1027,
+          "outlier_filter": {
+            "enabled": true,
+            "initial_valid": 567,
+            "removed": 0,
+            "final_valid": 567,
+            "removed_ratio": 0.0
+          },
+          "mean_corr_comb": 0.8212032244283544,
+          "median_displacement_arbm_norm": 0.1533640831529504,
+          "median_Eeq": 0.00496030812625292
+        },
+        {
+          "pair_index": 5,
+          "camera_pair": [
+            "cam_0",
+            "cam_11"
+          ],
+          "output_npz": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\pairs\\002\\pair_cam_0_cam_11_002.npz",
+          "output_ply": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\pairs\\002\\pair_cam_0_cam_11_002.ply",
+          "post_npz": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\post\\002\\pair_cam_0_cam_11_002_post.npz",
+          "num_points": 548,
+          "num_valid_points": 548,
+          "num_faces": 994,
+          "num_valid_faces": 994,
+          "outlier_filter": {
+            "enabled": true,
+            "initial_valid": 548,
+            "removed": 0,
+            "final_valid": 548,
+            "removed_ratio": 0.0
+          },
+          "mean_corr_comb": 0.8194386053438876,
+          "median_displacement_arbm_norm": 0.1521300001372829,
+          "median_Eeq": 0.0049688124221008954
+        },
+        {
+          "pair_index": 6,
+          "camera_pair": [
+            "cam_11",
+            "cam_10"
+          ],
+          "output_npz": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\pairs\\002\\pair_cam_11_cam_10_002.npz",
+          "output_ply": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\pairs\\002\\pair_cam_11_cam_10_002.ply",
+          "post_npz": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\post\\002\\pair_cam_11_cam_10_002_post.npz",
+          "num_points": 584,
+          "num_valid_points": 584,
+          "num_faces": 1074,
+          "num_valid_faces": 1074,
+          "outlier_filter": {
+            "enabled": true,
+            "initial_valid": 584,
+            "removed": 0,
+            "final_valid": 584,
+            "removed_ratio": 0.0
+          },
+          "mean_corr_comb": 0.8223954019479941,
+          "median_displacement_arbm_norm": 0.15106702514340142,
+          "median_Eeq": 0.0048570138622377424
+        },
+        {
+          "pair_index": 7,
+          "camera_pair": [
+            "cam_10",
+            "cam_9"
+          ],
+          "output_npz": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\pairs\\002\\pair_cam_10_cam_9_002.npz",
+          "output_ply": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\pairs\\002\\pair_cam_10_cam_9_002.ply",
+          "post_npz": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\post\\002\\pair_cam_10_cam_9_002_post.npz",
+          "num_points": 593,
+          "num_valid_points": 593,
+          "num_faces": 1065,
+          "num_valid_faces": 1065,
+          "outlier_filter": {
+            "enabled": true,
+            "initial_valid": 593,
+            "removed": 0,
+            "final_valid": 593,
+            "removed_ratio": 0.0
+          },
+          "mean_corr_comb": 0.8226073246734027,
+          "median_displacement_arbm_norm": 0.14676370471046837,
+          "median_Eeq": 0.004879502538019035
+        },
+        {
+          "pair_index": 8,
+          "camera_pair": [
+            "cam_9",
+            "cam_8"
+          ],
+          "output_npz": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\pairs\\002\\pair_cam_9_cam_8_002.npz",
+          "output_ply": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\pairs\\002\\pair_cam_9_cam_8_002.ply",
+          "post_npz": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\post\\002\\pair_cam_9_cam_8_002_post.npz",
+          "num_points": 591,
+          "num_valid_points": 591,
+          "num_faces": 1042,
+          "num_valid_faces": 1042,
+          "outlier_filter": {
+            "enabled": true,
+            "initial_valid": 591,
+            "removed": 0,
+            "final_valid": 591,
+            "removed_ratio": 0.0
+          },
+          "mean_corr_comb": 0.8243663183836347,
+          "median_displacement_arbm_norm": 0.15145951814596226,
+          "median_Eeq": 0.004886897557242397
+        },
+        {
+          "pair_index": 9,
+          "camera_pair": [
+            "cam_8",
+            "cam_7"
+          ],
+          "output_npz": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\pairs\\002\\pair_cam_8_cam_7_002.npz",
+          "output_ply": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\pairs\\002\\pair_cam_8_cam_7_002.ply",
+          "post_npz": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\post\\002\\pair_cam_8_cam_7_002_post.npz",
+          "num_points": 604,
+          "num_valid_points": 604,
+          "num_faces": 1096,
+          "num_valid_faces": 1096,
+          "outlier_filter": {
+            "enabled": true,
+            "initial_valid": 604,
+            "removed": 0,
+            "final_valid": 604,
+            "removed_ratio": 0.0
+          },
+          "mean_corr_comb": 0.8212438947009062,
+          "median_displacement_arbm_norm": 0.14198587722711115,
+          "median_Eeq": 0.004855388690798476
+        },
+        {
+          "pair_index": 10,
+          "camera_pair": [
+            "cam_7",
+            "cam_6"
+          ],
+          "output_npz": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\pairs\\002\\pair_cam_7_cam_6_002.npz",
+          "output_ply": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\pairs\\002\\pair_cam_7_cam_6_002.ply",
+          "post_npz": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\post\\002\\pair_cam_7_cam_6_002_post.npz",
+          "num_points": 588,
+          "num_valid_points": 588,
+          "num_faces": 1077,
+          "num_valid_faces": 1077,
+          "outlier_filter": {
+            "enabled": true,
+            "initial_valid": 588,
+            "removed": 0,
+            "final_valid": 588,
+            "removed_ratio": 0.0
+          },
+          "mean_corr_comb": 0.8208580997900898,
+          "median_displacement_arbm_norm": 0.15814984708161245,
+          "median_Eeq": 0.004952555996676801
+        },
+        {
+          "pair_index": 11,
+          "camera_pair": [
+            "cam_6",
+            "cam_5"
+          ],
+          "output_npz": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\pairs\\002\\pair_cam_6_cam_5_002.npz",
+          "output_ply": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\pairs\\002\\pair_cam_6_cam_5_002.ply",
+          "post_npz": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d\\post\\002\\pair_cam_6_cam_5_002_post.npz",
+          "num_points": 574,
+          "num_valid_points": 574,
+          "num_faces": 1048,
+          "num_valid_faces": 1048,
+          "outlier_filter": {
+            "enabled": true,
+            "initial_valid": 574,
+            "removed": 0,
+            "final_valid": 574,
+            "removed_ratio": 0.0
+          },
+          "mean_corr_comb": 0.8219036047294699,
+          "median_displacement_arbm_norm": 0.14509764409016293,
+          "median_Eeq": 0.005015188320116076
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "warnings": []
+}

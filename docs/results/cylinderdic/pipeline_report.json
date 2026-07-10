@@ -1,0 +1,200 @@
+{
+  "ok": true,
+  "steps": [
+    "validate"
+  ],
+  "completed_steps": [
+    "validate"
+  ],
+  "reports": {
+    "validate": {
+      "ok": true,
+      "project": "CylinderDIC",
+      "case_root": "C:\\01project\\Multi-DIC\\case\\CylinderDIC",
+      "result_root": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results",
+      "camera_count": 12,
+      "cameras": [
+        {
+          "camera": "cam_0",
+          "speckle_frames": [
+            "001.bmp",
+            "002.bmp"
+          ],
+          "calibration_frames": [
+            "001.bmp"
+          ],
+          "image_size": [
+            1440,
+            1080
+          ]
+        },
+        {
+          "camera": "cam_1",
+          "speckle_frames": [
+            "001.bmp",
+            "002.bmp"
+          ],
+          "calibration_frames": [
+            "001.bmp"
+          ],
+          "image_size": [
+            1440,
+            1080
+          ]
+        },
+        {
+          "camera": "cam_2",
+          "speckle_frames": [
+            "001.bmp",
+            "002.bmp"
+          ],
+          "calibration_frames": [
+            "001.bmp"
+          ],
+          "image_size": [
+            1440,
+            1080
+          ]
+        },
+        {
+          "camera": "cam_3",
+          "speckle_frames": [
+            "001.bmp",
+            "002.bmp"
+          ],
+          "calibration_frames": [
+            "001.bmp"
+          ],
+          "image_size": [
+            1440,
+            1080
+          ]
+        },
+        {
+          "camera": "cam_4",
+          "speckle_frames": [
+            "001.bmp",
+            "002.bmp"
+          ],
+          "calibration_frames": [
+            "001.bmp"
+          ],
+          "image_size": [
+            1440,
+            1080
+          ]
+        },
+        {
+          "camera": "cam_5",
+          "speckle_frames": [
+            "001.bmp",
+            "002.bmp"
+          ],
+          "calibration_frames": [
+            "001.bmp"
+          ],
+          "image_size": [
+            1440,
+            1080
+          ]
+        },
+        {
+          "camera": "cam_6",
+          "speckle_frames": [
+            "001.bmp",
+            "002.bmp"
+          ],
+          "calibration_frames": [
+            "001.bmp"
+          ],
+          "image_size": [
+            1440,
+            1080
+          ]
+        },
+        {
+          "camera": "cam_7",
+          "speckle_frames": [
+            "001.bmp",
+            "002.bmp"
+          ],
+          "calibration_frames": [
+            "001.bmp"
+          ],
+          "image_size": [
+            1440,
+            1080
+          ]
+        },
+        {
+          "camera": "cam_8",
+          "speckle_frames": [
+            "001.bmp",
+            "002.bmp"
+          ],
+          "calibration_frames": [
+            "001.bmp"
+          ],
+          "image_size": [
+            1440,
+            1080
+          ]
+        },
+        {
+          "camera": "cam_9",
+          "speckle_frames": [
+            "001.bmp",
+            "002.bmp"
+          ],
+          "calibration_frames": [
+            "001.bmp"
+          ],
+          "image_size": [
+            1440,
+            1080
+          ]
+        },
+        {
+          "camera": "cam_10",
+          "speckle_frames": [
+            "001.bmp",
+            "002.bmp"
+          ],
+          "calibration_frames": [
+            "001.bmp"
+          ],
+          "image_size": [
+            1440,
+            1080
+          ]
+        },
+        {
+          "camera": "cam_11",
+          "speckle_frames": [
+            "001.bmp",
+            "002.bmp"
+          ],
+          "calibration_frames": [
+            "001.bmp"
+          ],
+          "image_size": [
+            1440,
+            1080
+          ]
+        }
+      ],
+      "created_directories": [
+        "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results",
+        "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\logs",
+        "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\sfm",
+        "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\scale",
+        "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\masks",
+        "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\dic2d",
+        "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d",
+        "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\figures"
+      ],
+      "warnings": [],
+      "errors": []
+    }
+  }
+}
