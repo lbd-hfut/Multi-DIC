@@ -17,7 +17,7 @@ from .api import (
     validate_project,
 )
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 __all__ = [
     "MDICConfig",
