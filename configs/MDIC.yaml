@@ -119,6 +119,13 @@ recon3d:
   min_corrcoef: 0.6
   max_reprojection_error_px: 2.0
   use_scale_correction: true
+  outlier_filter:
+    enabled: true
+    min_points: 20
+    position_mad_z: 8.0
+    displacement_mad_z: 8.0
+    max_position_radius_world: 0.0
+    max_displacement_norm_world: 0.0
   pairs:
     mode: auto_spatial
     wrap: true

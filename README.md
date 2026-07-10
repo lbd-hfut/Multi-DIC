@@ -9,16 +9,45 @@ with a pinned version for reproducibility.
 ```bash
 ~/.local/bin/micromamba create -y -f environment.yml
 ~/.local/bin/micromamba run -n multi-dic python -m pip install -e .
-~/.local/bin/micromamba run -n multi-dic python -m multidic run --config configs/MDIC.yaml --step validate
-~/.local/bin/micromamba run -n multi-dic python -m multidic run --config configs/MDIC.yaml --step sfm
-~/.local/bin/micromamba run -n multi-dic python -m multidic run --config configs/MDIC.yaml --step scale
-~/.local/bin/micromamba run -n multi-dic python -m multidic run --config configs/MDIC.yaml --step mask
-~/.local/bin/micromamba run -n multi-dic python -m multidic run --config configs/MDIC.yaml --step dic2d
-~/.local/bin/micromamba run -n multi-dic python -m multidic run --config configs/MDIC.yaml --step recon3d
+~/.local/bin/micromamba run -n multi-dic python -m pymultidic run --config configs/MDIC.yaml --step validate
+~/.local/bin/micromamba run -n multi-dic python -m pymultidic run --config configs/MDIC.yaml --step sfm
+~/.local/bin/micromamba run -n multi-dic python -m pymultidic run --config configs/MDIC.yaml --step scale
+~/.local/bin/micromamba run -n multi-dic python -m pymultidic run --config configs/MDIC.yaml --step mask
+~/.local/bin/micromamba run -n multi-dic python -m pymultidic run --config configs/MDIC.yaml --step dic2d
+~/.local/bin/micromamba run -n multi-dic python -m pymultidic run --config configs/MDIC.yaml --step recon3d
 ```
 
 `reference_code_lib/` is only used as local reference source code. The formal
 project implementation lives in the repository root.
+
+The same flow can be called from Python:
+
+```python
+import pymultidic
+
+config = pymultidic.load_config("configs/MDIC.yaml")
+pymultidic.run_pipeline(config, steps=["validate", "sfm", "scale", "mask", "dic2d", "recon3d"])
+```
+
+## Native Build
+
+The native C++ components can be built from WSL through the top-level
+`native/CMakeLists.txt`. One configure/build pass produces the Ncorr library and
+CLI plus the Recon3D pybind11 extension:
+
+```bash
+cmake -S native -B build/wsl-native -G Ninja \
+  -DPYBIND11_FINDPYTHON=ON \
+  -DPython_EXECUTABLE=/usr/bin/python3 \
+  -Dpybind11_DIR=$(python3 -m pybind11 --cmakedir)
+cmake --build build/wsl-native
+```
+
+Expected outputs include:
+
+- `build/wsl-native/ncorr/libnative_ncorr.a`
+- `build/wsl-native/ncorr/ncorr_cli`
+- `build/wsl-native/recon3d/native_recon3d*.so`
 
 ## COLMAP Backend
 
@@ -94,6 +123,10 @@ the same NumPy implementation.
 
 Recon3D also writes QC statistics and figures for displacement norm,
 reprojection error, DIC correlation, view count, and per-camera contribution.
+After triangulation, Recon3D applies a configurable 3D outlier filter to remove
+large isolated reconstructed points based on robust position-radius and
+displacement-norm MAD thresholds. The filter updates the valid masks and records
+removed counts in `recon3d_report.json`.
 
 Recon3D additionally exports MultiDIC-style pair surfaces under
 `case/CylinderDIC/results/recon3d/pairs/<frame>/`. By default

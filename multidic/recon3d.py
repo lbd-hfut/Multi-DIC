@@ -87,6 +87,8 @@ def _run_recon3d_frame(
         )
     else:
         result = _reconstruct_tracks_numpy(cameras, observations, dic_fields, cfg, scale)
+    result = _apply_recon3d_outlier_filter(result, cfg, "valid")
+    outlier_filter = _outlier_filter_report(result, "valid")
 
     stem = Path(frame_name).stem
     npz_path = cfg["output_dir"] / f"recon3d_{stem}.npz"
@@ -121,6 +123,7 @@ def _run_recon3d_frame(
         "mean_views": float(np.mean(result["num_views"][valid])) if np.any(valid) else 0.0,
         "mean_corrcoef": float(np.mean(result["mean_corrcoef"][valid])) if np.any(valid) else 0.0,
         "median_displacement_norm": float(np.median(disp_norm)) if disp_norm.size else 0.0,
+        "outlier_filter": outlier_filter,
         "qc": qc_summary,
         "qc_outputs": qc_outputs,
         "pair_selection": pair_selection,
@@ -182,6 +185,7 @@ def _run_pair_surface_frame(
                 "num_valid_points": int(np.count_nonzero(pair_result["valid_points"])),
                 "num_faces": int(len(pair_result["faces"])),
                 "num_valid_faces": int(np.count_nonzero(pair_result["valid_faces"])),
+                "outlier_filter": _outlier_filter_report(pair_result, "valid_points"),
                 "mean_corr_comb": float(np.mean(pair_result["corr_comb"][pair_result["valid_points"]]))
                 if np.any(pair_result["valid_points"])
                 else 0.0,
@@ -354,6 +358,8 @@ def _finish_pair_surface_from_points(
     reproj_ref = np.asarray(point_result["reprojection_error_ref"], dtype=np.float64)
     reproj_def = np.asarray(point_result["reprojection_error_def"], dtype=np.float64)
     valid_points = np.asarray(point_result["valid_points"], dtype=bool)
+    point_result = _apply_recon3d_outlier_filter(point_result, cfg, "valid_points")
+    valid_points = np.asarray(point_result["valid_points"], dtype=bool)
     faces = _triangulate_pair_faces(uv_ref_a, valid_points, float(cfg["pair_max_edge_px"]))
     valid_faces = _filter_pair_faces(
         faces,
@@ -372,6 +378,8 @@ def _finish_pair_surface_from_points(
         **point_result,
         "faces": faces.astype(np.int32),
         "valid_faces": valid_faces,
+        "outlier_filter_removed": np.asarray(point_result.get("outlier_filter_removed", 0), dtype=np.int32),
+        "outlier_filter_initial_valid": np.asarray(point_result.get("outlier_filter_initial_valid", 0), dtype=np.int32),
         "face_corr_comb": _face_min(corr_comb, faces),
         "face_centroids_ref": _face_centroids(points_ref_world, faces),
         "face_centroids_def": _face_centroids(points_def_world, faces),
@@ -635,6 +643,85 @@ def _numeric_stats_array(values: np.ndarray) -> np.ndarray:
     stats = _array_stats(values)
     keys = ("count", "mean", "std", "min", "p05", "p25", "median", "p75", "p95", "max")
     return np.asarray([np.nan if stats[key] is None else float(stats[key]) for key in keys], dtype=np.float64)
+
+
+def _apply_recon3d_outlier_filter(result: dict[str, Any], cfg: dict[str, Any], valid_key: str) -> dict[str, np.ndarray]:
+    out = {str(key): np.asarray(value) for key, value in result.items()}
+    if valid_key not in out or "points_ref_world" not in out or "displacement_world" not in out:
+        return out
+
+    valid = np.asarray(out[valid_key], dtype=bool).copy()
+    initial_valid = int(np.count_nonzero(valid))
+    keep = valid.copy()
+    reasons = np.zeros(len(valid), dtype=np.uint8)
+    enabled = bool(cfg["outlier_filter_enabled"])
+    if enabled and initial_valid >= int(cfg["outlier_filter_min_points"]):
+        points = np.asarray(out["points_ref_world"], dtype=np.float64)
+        disp = np.asarray(out["displacement_world"], dtype=np.float64)
+        finite = valid & np.all(np.isfinite(points), axis=1) & np.all(np.isfinite(disp), axis=1)
+        keep &= finite
+        reasons[valid & ~finite] |= 1
+
+        if np.count_nonzero(finite) >= int(cfg["outlier_filter_min_points"]):
+            center = np.median(points[finite], axis=0)
+            position_radius = np.linalg.norm(points - center, axis=1)
+            position_outliers = _robust_upper_outliers(
+                position_radius,
+                finite,
+                float(cfg["outlier_filter_position_mad_z"]),
+                float(cfg["outlier_filter_max_position_radius_world"]),
+            )
+            displacement_norm = np.linalg.norm(disp, axis=1)
+            displacement_outliers = _robust_upper_outliers(
+                displacement_norm,
+                finite,
+                float(cfg["outlier_filter_displacement_mad_z"]),
+                float(cfg["outlier_filter_max_displacement_norm_world"]),
+            )
+            keep &= ~position_outliers
+            keep &= ~displacement_outliers
+            reasons[position_outliers] |= 2
+            reasons[displacement_outliers] |= 4
+
+    out[valid_key] = keep.astype(bool)
+    out["outlier_filter_keep"] = keep.astype(bool)
+    out["outlier_filter_reason"] = reasons
+    out["outlier_filter_enabled"] = np.asarray(enabled, dtype=bool)
+    out["outlier_filter_initial_valid"] = np.asarray(initial_valid, dtype=np.int32)
+    out["outlier_filter_removed"] = np.asarray(initial_valid - int(np.count_nonzero(keep)), dtype=np.int32)
+    return out
+
+
+def _robust_upper_outliers(values: np.ndarray, mask: np.ndarray, mad_z: float, absolute_max: float) -> np.ndarray:
+    values = np.asarray(values, dtype=np.float64)
+    mask = np.asarray(mask, dtype=bool) & np.isfinite(values)
+    outliers = np.zeros(len(values), dtype=bool)
+    if absolute_max > 0.0:
+        outliers |= mask & (values > absolute_max)
+    if mad_z <= 0.0 or np.count_nonzero(mask) < 3:
+        return outliers
+    sample = values[mask]
+    median = float(np.median(sample))
+    mad = float(np.median(np.abs(sample - median)))
+    sigma = 1.4826 * mad
+    if sigma <= 1.0e-12 or not np.isfinite(sigma):
+        return outliers
+    outliers |= mask & (((values - median) / sigma) > mad_z)
+    return outliers
+
+
+def _outlier_filter_report(result: dict[str, np.ndarray], valid_key: str) -> dict[str, Any]:
+    initial = int(np.asarray(result.get("outlier_filter_initial_valid", 0)).item())
+    removed = int(np.asarray(result.get("outlier_filter_removed", 0)).item())
+    enabled = bool(np.asarray(result.get("outlier_filter_enabled", False)).item())
+    valid = np.asarray(result.get(valid_key, []), dtype=bool)
+    return {
+        "enabled": enabled,
+        "initial_valid": initial,
+        "removed": removed,
+        "final_valid": int(np.count_nonzero(valid)),
+        "removed_ratio": float(removed / initial) if initial else 0.0,
+    }
 
 
 def _reconstruct_tracks_numpy(
@@ -1547,6 +1634,9 @@ def _recon_config(config: MDICConfig) -> dict[str, Any]:
     post3d = raw.get("post3d", {})
     if not isinstance(post3d, dict):
         post3d = {}
+    outlier_filter = raw.get("outlier_filter", {})
+    if not isinstance(outlier_filter, dict):
+        outlier_filter = {}
     return {
         "sfm_dir": config.result_root / "sfm" / workspace,
         "dic2d_dir": config.result_root / str(raw.get("input_dic2d_dir", "dic2d")),
@@ -1580,6 +1670,12 @@ def _recon_config(config: MDICConfig) -> dict[str, Any]:
         "post3d_remove_rbm": bool(post3d.get("remove_rigid_body_motion", True)),
         "post3d_compute_face_measures": bool(post3d.get("compute_face_measures", True)),
         "post3d_compute_strain": bool(post3d.get("compute_strain", True)),
+        "outlier_filter_enabled": bool(outlier_filter.get("enabled", True)),
+        "outlier_filter_min_points": int(outlier_filter.get("min_points", 20)),
+        "outlier_filter_position_mad_z": float(outlier_filter.get("position_mad_z", 8.0)),
+        "outlier_filter_displacement_mad_z": float(outlier_filter.get("displacement_mad_z", 8.0)),
+        "outlier_filter_max_position_radius_world": float(outlier_filter.get("max_position_radius_world", 0.0)),
+        "outlier_filter_max_displacement_norm_world": float(outlier_filter.get("max_displacement_norm_world", 0.0)),
     }
 
 

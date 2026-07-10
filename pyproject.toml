@@ -1,12 +1,19 @@
 [build-system]
-requires = ["setuptools>=68"]
-build-backend = "setuptools.build_meta"
+requires = [
+  "scikit-build-core>=0.10",
+  "pybind11>=2.11",
+]
+build-backend = "scikit_build_core.build"
 
 [project]
-name = "multi-dic"
+name = "pymultidic"
 version = "0.1.0"
 description = "Config-driven calibration-free multi-view DIC workflow."
+readme = "README.md"
 requires-python = ">=3.10"
+authors = [
+  { name = "LeeBDa", email = "liboda1101@gmail.com" },
+]
 dependencies = [
   "matplotlib>=3.8",
   "numpy>=1.26",
@@ -17,14 +24,34 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-native = [
+build = [
   "cmake>=3.20",
+  "cibuildwheel>=2.20",
   "ninja>=1.11",
   "pybind11>=2.11",
+  "twine>=5.0",
+  "build>=1.2",
 ]
 
 [project.scripts]
-mdic = "multidic.cli:main"
+pymultidic = "pymultidic.cli:main"
+mdic = "pymultidic.cli:main"
 
-[tool.setuptools.packages.find]
-include = ["multidic*"]
+[project.urls]
+Homepage = "https://github.com/lbd-hfut/Multi-DIC"
+Repository = "https://github.com/lbd-hfut/Multi-DIC"
+Issues = "https://github.com/lbd-hfut/Multi-DIC/issues"
+
+[tool.scikit-build]
+cmake.source-dir = "native"
+wheel.packages = ["multidic", "pymultidic"]
+sdist.exclude = [
+  ".claude",
+  "build",
+  "case",
+  "dist",
+  "reference_code_lib",
+]
+
+[tool.scikit-build.cmake.define]
+PYBIND11_FINDPYTHON = "ON"

@@ -5,12 +5,12 @@
 ## 当前入口
 
 ```bash
-python -m multidic run --config configs/MDIC.yaml --step validate
-python -m multidic run --config configs/MDIC.yaml --step sfm
-python -m multidic run --config configs/MDIC.yaml --step scale
-python -m multidic run --config configs/MDIC.yaml --step mask
-python -m multidic run --config configs/MDIC.yaml --step dic2d
-python -m multidic run --config configs/MDIC.yaml --step recon3d
+python -m pymultidic run --config configs/MDIC.yaml --step validate
+python -m pymultidic run --config configs/MDIC.yaml --step sfm
+python -m pymultidic run --config configs/MDIC.yaml --step scale
+python -m pymultidic run --config configs/MDIC.yaml --step mask
+python -m pymultidic run --config configs/MDIC.yaml --step dic2d
+python -m pymultidic run --config configs/MDIC.yaml --step recon3d
 ```
 
 ## 配置约定
@@ -128,6 +128,8 @@ case/<case_name>/results/recon3d/
 计算后端优先尝试 `native_recon3d` pybind11 扩展；如果未编译，则使用 NumPy fallback。Python 层负责配置、IO、报告和导出；C++ 层负责批量 DIC 插值、多视角三角化和误差过滤。
 
 QC 统计写入 `recon3d_report.json`，包括位移模长、参考/变形重投影误差、DIC 相关系数、有效视角数分布，以及每个相机贡献的 track 数量。QC 图和 PLY 默认随 `recon3d` 一起生成，可通过 `recon3d.qc` 和 `recon3d.export` 配置开关。
+
+三维点清洗在三角化后执行。`recon3d.outlier_filter` 默认启用，会在已经通过重投影误差和相关系数过滤的有效点中，使用参考三维点到稳健中心的距离和三维位移模长做 median/MAD 上界检测，剔除明显偏大的离群点。全局 track 重建和 pair surface 都会更新各自的 `valid`/`valid_points` 掩码；pair surface 会在清洗后重新生成/过滤 `valid_faces`，避免后处理应变使用离群顶点。清洗数量写入 `recon3d_report.json` 的 `outlier_filter` 字段，并随 `.npz` 保存 `outlier_filter_keep`、`outlier_filter_reason` 等追溯字段。
 
 #### pair surface
 

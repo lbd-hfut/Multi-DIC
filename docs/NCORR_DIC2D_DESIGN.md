@@ -54,7 +54,7 @@ NcorrResult run_ncorr_dic2d(
 - Ncorr reduced-grid ROI
 - `spacing + 1` 对应的像素尺度因子
 
-Python 层 `multidic` 负责组织相机、帧和文件输出；native 层只负责 Ncorr 算法计算。
+Python 层 `pymultidic` API 负责组织相机、帧和文件输出；native 层只负责 Ncorr 算法计算。
 
 ## 配置字段
 

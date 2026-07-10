@@ -23,16 +23,16 @@
 ## 流程检查
 
 ```bash
-~/.local/bin/micromamba run -n multi-dic python -m multidic run \
+~/.local/bin/micromamba run -n multi-dic python -m pymultidic run \
   --config configs/MDIC.yaml --step validate
 
-~/.local/bin/micromamba run -n multi-dic python -m multidic run \
+~/.local/bin/micromamba run -n multi-dic python -m pymultidic run \
   --config configs/MDIC.yaml --step sfm
 
-~/.local/bin/micromamba run -n multi-dic python -m multidic run \
+~/.local/bin/micromamba run -n multi-dic python -m pymultidic run \
   --config configs/MDIC.yaml --step scale
 
-~/.local/bin/micromamba run -n multi-dic python -m multidic run \
+~/.local/bin/micromamba run -n multi-dic python -m pymultidic run \
   --config configs/MDIC.yaml --step mask
 ```
 

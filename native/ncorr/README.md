@@ -33,19 +33,17 @@ represented in `configs/MDIC.yaml` under `dic2d`.
 
 ## WSL build
 
-When CMake is unavailable in WSL, the current API scaffold can be checked with:
+When CMake is unavailable in WSL, the current API scaffold can be built with:
 
 ```bash
 cd /mnt/c/01project/Multi-DIC/native/ncorr
-make smoke
 make all
 ```
 
-This builds `build/libnative_ncorr.a` and runs a small seed-selection/API smoke
-test. `make all` also builds `build/ncorr_cli`, a thin command-line wrapper used
-by the Python `dic2d` step to call the function-style native API from WSL. The
-legacy Ncorr MEX files in `legacy/` are preserved source material and are not
-compiled by this Makefile yet.
+This builds `build/libnative_ncorr.a` and `build/ncorr_cli`, a thin command-line
+wrapper used by the Python `dic2d` step to call the function-style native API
+from WSL. The legacy Ncorr MEX files in `legacy/` are preserved source material
+and are not compiled by this Makefile yet.
 
 ## Current status
 

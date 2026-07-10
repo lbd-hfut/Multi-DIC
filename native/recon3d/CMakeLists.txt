@@ -8,6 +8,10 @@ if(pybind11_FOUND)
   else()
     target_compile_options(native_recon3d PRIVATE -Wall -Wextra -Wpedantic)
   endif()
+  install(TARGETS native_recon3d
+    LIBRARY DESTINATION .
+    RUNTIME DESTINATION .
+  )
 else()
   message(STATUS "pybind11 was not found; native_recon3d Python module will not be built.")
 endif()

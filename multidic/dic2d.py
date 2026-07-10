@@ -4,6 +4,7 @@ import json
 import os
 import subprocess
 import tempfile
+from importlib.resources import files
 from pathlib import Path
 from typing import Any
 
@@ -106,8 +107,23 @@ def _normalize_dic2d_config(dic_raw: dict[str, Any], roi_raw: dict[str, Any]) ->
 
 
 def _native_cli_path(config: MDICConfig) -> Path | None:
-    candidate = config.workspace_root / "native" / "ncorr" / "build" / "ncorr_cli"
-    return candidate if candidate.exists() else None
+    exe_name = "ncorr_cli.exe" if os.name == "nt" else "ncorr_cli"
+    candidates: list[Path] = []
+    try:
+        candidates.append(Path(str(files("pymultidic").joinpath("bin", exe_name))))
+    except Exception:
+        pass
+    candidates.extend(
+        [
+            config.workspace_root / "build" / "wsl-native" / "ncorr" / "ncorr_cli",
+            config.workspace_root / "native" / "ncorr" / "build" / "ncorr_cli",
+            config.workspace_root / "native" / "ncorr" / "build" / exe_name,
+        ]
+    )
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return None
 
 
 def _run_camera_frames(
@@ -267,7 +283,7 @@ def _native_command(
         "--lenscoef",
         str(float(dic_raw.get("lenscoef", 0.0))),
     ]
-    if os.name != "nt":
+    if os.name != "nt" or native_cli.suffix.lower() == ".exe":
         return args
     return ["wsl", "-e", *[_windows_path_to_wsl(arg) if _looks_like_windows_path(arg) else arg for arg in args]]
 
