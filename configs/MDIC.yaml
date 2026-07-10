@@ -20,30 +20,141 @@ data:
 
 scale_correction:
   checkerboard_meta: calibrate_images/chessboard_meta.json
-  square_size: 1.0
+  image_dir: calibrate_images
+  square_size: 10.0
   square_size_unit: mm
+  pair_selection: all_pairs
+  scale_stat: trimmed_mean
+  trim_fraction: 0.20
+  max_pair_edge_cv: 0.08
+  max_edge_cv_warning: 0.05
+  corner_order_edge_cv_weight: 1.0
+  subpix_window: 11
+  min_common_corners: 12
+  max_reprojection_error_px: 3.0
+  save_overlays: true
+  output_dir: scale
 
-dic:
+mask:
+  user_mask_dir: masks
+  use_user_mask_if_present: true
+  output_dir: masks
+  external_threshold: 127
+  outlier_k: 6
+  outlier_knn_scale: 4.0
+  component_radius_scale: 8.0
+  edge_scale: 8.0
+  radius_scale: 6.0
+  min_hole_area: 500
+  tiny_hole_fill_area: 3000
+  speckle_std_ratio: 0.35
+  speckle_lap_ratio: 0.35
+  speckle_grad_ratio: 0.35
+  min_speckle_std: 6.0
+  min_speckle_lap: 3.0
+  overlay_alpha: 0.45
+  dpi: 180
+
+dic2d:
+  engine: ncorr
+  analysis_type: regular
   subset_radius: 20
-  step: 5
-  search_radius: 30
-  strain_radius: 15
-  cutoff_corrcoef: 0.6
+  subset_spacing: 5
+  seed_search_radius: 50
+  rg_search_radius: 1
+  cutoff_diffnorm: 1.0e-6
+  cutoff_iteration: 50
+  num_threads: 1
+  subset_truncation: false
+  step_analysis:
+    enabled: false
+    type: seed
+    auto: true
+    step: 5
+  roi:
+    source: auto_or_user
+    user_roi_mode: last_image
+    mask_output_dir: masks/mask
+    external_threshold: 127
+    min_region_area: 2000
+  seed:
+    source: colmap_observations
+    selection: first_inside_roi
+  format:
+    units_per_pixel: 1.0
+    units: pixels
+    cutoff_corrcoef: 0.6
+    lenscoef: 0.0
+  strain:
+    enabled: false
 
 colmap:
+  backend: pycolmap
   workspace: colmap
-  camera_model: OPENCV
+  reference_camera: cam_0
+  camera_model: SIMPLE_RADIAL
   matcher: exhaustive
+  use_gpu: false
+  overwrite: true
+  max_features: 8192
+  first_octave: -1
+  cross_check: false
+  min_num_matches: 8
+  multiple_models: true
+  min_model_size: 3
+  ba_global_max_refinements: 5
+  max_reproj_error: 4.0
+  dpi: 180
+  min_focal_length_ratio: 0.1
+  max_focal_length_ratio: 10.0
+  random_seed: 0
+  num_threads: 1
 
-reconstruction:
+recon3d:
+  backend: native
+  output_dir: recon3d
+  input_dic2d_dir: dic2d
+  scale_dir: scale
   min_views: 2
+  min_corrcoef: 0.6
   max_reprojection_error_px: 2.0
+  use_scale_correction: true
+  pairs:
+    mode: auto_spatial
+    wrap: true
+    manual: []
+    auto_circularity_threshold: 0.45
+    auto_wrap_distance_ratio: 1.8
+    auto_wrap_min_shared_ratio: 0.35
+    auto_max_neighbor_distance_ratio: 2.0
+    auto_min_shared_tracks: 20
+  pair_surface:
+    enabled: true
+    triangulation_domain: reference_uv
+    max_edge_px: 80.0
+    min_face_corrcoef: 0.6
+    max_face_reprojection_error_px: 2.0
+  post3d:
+    enabled: true
+    remove_rigid_body_motion: true
+    compute_face_measures: true
+    compute_strain: true
+  qc:
+    enabled: true
+    plots: true
+    vector_scale: 1.0
+  export:
+    npz: true
+    ply: true
+    png: true
+    qc_ply: true
 
 output:
   subdirectories:
     - logs
     - sfm
     - scale
+    - masks
     - dic2d
     - recon3d
     - figures

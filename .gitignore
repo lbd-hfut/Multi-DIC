@@ -224,3 +224,6 @@ reference_code_lib/
 case/**/result/
 case/**/results/
 case/**/ground_truth/
+
+# Native build outputs
+native/**/build*/

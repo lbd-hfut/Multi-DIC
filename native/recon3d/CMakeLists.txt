@@ -1,0 +1,13 @@
+find_package(pybind11 CONFIG QUIET)
+
+if(pybind11_FOUND)
+  pybind11_add_module(native_recon3d src/recon3d_bindings.cpp)
+  target_compile_features(native_recon3d PRIVATE cxx_std_17)
+  if(MSVC)
+    target_compile_options(native_recon3d PRIVATE /W4)
+  else()
+    target_compile_options(native_recon3d PRIVATE -Wall -Wextra -Wpedantic)
+  endif()
+else()
+  message(STATUS "pybind11 was not found; native_recon3d Python module will not be built.")
+endif()
