@@ -7,7 +7,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "pymultidic"
-version = "0.1.2"
+version = "0.1.3"
 description = "Config-driven calibration-free multi-view DIC workflow."
 readme = "README.md"
 requires-python = ">=3.10"

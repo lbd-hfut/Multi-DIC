@@ -26,7 +26,7 @@ jobs:
             cibw_archs: x86_64
           - os: windows-latest
             cibw_archs: AMD64
-          - os: macos-14-arm64
+          - os: macos-14
             cibw_archs: arm64
 
     steps:
