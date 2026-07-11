@@ -78,7 +78,6 @@ jobs:
             freeimage:x64-windows `
             glew:x64-windows `
             glog:x64-windows `
-            lapack:x64-windows `
             metis:x64-windows `
             openimageio:x64-windows `
             sqlite3:x64-windows `
@@ -96,7 +95,7 @@ jobs:
           CIBW_BEFORE_ALL_LINUX: "dnf install -y dnf-plugins-core epel-release || true; dnf config-manager --set-enabled crb || true; dnf install -y boost-devel ceres-solver-devel eigen3-devel flann-devel freeimage-devel glew-devel glog-devel lapack-devel metis-devel openblas-devel opencv-devel OpenImageIO-devel OpenImageIO-utils sqlite-devel suitesparse-devel; touch /usr/bin/iv; chmod +x /usr/bin/iv"
           CIBW_ENVIRONMENT_LINUX: "CFLAGS='-march=x86-64 -mtune=generic -Wa,-mx86-used-note=no' CXXFLAGS='-march=x86-64 -mtune=generic -Wa,-mx86-used-note=no'"
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: "python .github/scripts/strip_gnu_property.py {wheel} && auditwheel repair -w {dest_dir} {wheel}"
-          CIBW_ENVIRONMENT_WINDOWS: "CMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake VCPKG_TARGET_TRIPLET=x64-windows CMAKE_ARGS='-DBLA_VENDOR=OpenBLAS'"
+          CIBW_ENVIRONMENT_WINDOWS: "CMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake VCPKG_TARGET_TRIPLET=x64-windows CMAKE_ARGS='-DBLA_VENDOR=OpenBLAS -DBLAS_LIBRARIES=C:/vcpkg/installed/x64-windows/lib/openblas.lib -DLAPACK_LIBRARIES=C:/vcpkg/installed/x64-windows/lib/openblas.lib'"
           CIBW_ENVIRONMENT_MACOS: "MACOSX_DEPLOYMENT_TARGET=14.0 OpenMP_ROOT=/opt/homebrew/opt/libomp CMAKE_PREFIX_PATH='/opt/homebrew/opt/libomp;/opt/homebrew' CPPFLAGS='-I/opt/homebrew/opt/libomp/include' LDFLAGS='-L/opt/homebrew/opt/libomp/lib'"
           CIBW_TEST_COMMAND: "python -c \"import pymultidic, native_colmap, native_recon3d; print(pymultidic.__version__); print(native_colmap.capabilities()); print(native_recon3d.__doc__)\""
 
