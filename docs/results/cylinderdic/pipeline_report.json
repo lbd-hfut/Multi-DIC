@@ -1,17 +1,29 @@
 {
   "ok": true,
   "steps": [
-    "validate"
+    "validate",
+    "sfm",
+    "scale",
+    "mask",
+    "dic2d",
+    "recon3d",
+    "visualize3d"
   ],
   "completed_steps": [
-    "validate"
+    "validate",
+    "sfm",
+    "scale",
+    "mask",
+    "dic2d",
+    "recon3d",
+    "visualize3d"
   ],
   "reports": {
     "validate": {
       "ok": true,
       "project": "CylinderDIC",
-      "case_root": "C:\\01project\\Multi-DIC\\case\\CylinderDIC",
-      "result_root": "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results",
+      "case_root": "/mnt/c/01project/Multi-DIC/case/CylinderDIC",
+      "result_root": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results",
       "camera_count": 12,
       "cameras": [
         {
@@ -184,17 +196,1780 @@
         }
       ],
       "created_directories": [
-        "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results",
-        "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\logs",
-        "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\sfm",
-        "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\scale",
-        "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\masks",
-        "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\dic2d",
-        "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\recon3d",
-        "C:\\01project\\Multi-DIC\\case\\CylinderDIC\\results\\figures"
+        "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results",
+        "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/logs",
+        "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/sfm",
+        "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/scale",
+        "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/masks",
+        "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/dic2d",
+        "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d",
+        "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/figures"
       ],
       "warnings": [],
       "errors": []
+    },
+    "sfm": {
+      "ok": true,
+      "project": "CylinderDIC",
+      "backend": "native_colmap",
+      "workspace": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/sfm/colmap",
+      "database_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/sfm/colmap/colmap.db",
+      "image_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/sfm/colmap/colmap_images",
+      "image_names": [
+        "cam_0_001.bmp",
+        "cam_1_001.bmp",
+        "cam_2_001.bmp",
+        "cam_3_001.bmp",
+        "cam_4_001.bmp",
+        "cam_5_001.bmp",
+        "cam_6_001.bmp",
+        "cam_7_001.bmp",
+        "cam_8_001.bmp",
+        "cam_9_001.bmp",
+        "cam_10_001.bmp",
+        "cam_11_001.bmp"
+      ],
+      "source_image_names": [
+        "images/cam_0/001.bmp",
+        "images/cam_1/001.bmp",
+        "images/cam_2/001.bmp",
+        "images/cam_3/001.bmp",
+        "images/cam_4/001.bmp",
+        "images/cam_5/001.bmp",
+        "images/cam_6/001.bmp",
+        "images/cam_7/001.bmp",
+        "images/cam_8/001.bmp",
+        "images/cam_9/001.bmp",
+        "images/cam_10/001.bmp",
+        "images/cam_11/001.bmp"
+      ],
+      "steps": [
+        {
+          "name": "native_colmap_cpu_sfm",
+          "ok": true,
+          "elapsed_seconds": 49.946
+        }
+      ],
+      "reconstructions": [
+        {
+          "model_id": 0,
+          "path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/sfm/colmap/colmap_sfm/0",
+          "num_images": 12,
+          "num_reg_images": 12,
+          "num_points3D": 3606,
+          "mean_reprojection_error": 0.320048
+        }
+      ],
+      "warnings": [],
+      "errors": [],
+      "native_colmap_capabilities": {
+        "embedded_colmap": true,
+        "cpu_only": true,
+        "feature_extraction": "sift",
+        "matching": "ring/imported, sequential, exhaustive",
+        "mapping": "incremental",
+        "exports": [
+          "binary_colmap",
+          "text_colmap"
+        ],
+        "excluded": [
+          "cuda",
+          "gpu_sift",
+          "gui",
+          "dense_mvs",
+          "meshing",
+          "pycolmap_api"
+        ]
+      },
+      "native_colmap_backend": "embedded_colmap",
+      "command_logs": [],
+      "native_colmap_steps": [
+        {
+          "name": "feature_extractor",
+          "backend": "embedded_colmap"
+        },
+        {
+          "name": "ring_pair_matcher",
+          "backend": "embedded_colmap"
+        },
+        {
+          "name": "incremental_mapping",
+          "backend": "embedded_colmap"
+        },
+        {
+          "name": "write_text_models",
+          "backend": "embedded_colmap"
+        }
+      ],
+      "native_colmap_models": [
+        {
+          "model_id": 0,
+          "num_registered_images": 12,
+          "num_points3D": 3606,
+          "mean_reprojection_error": 0.320048,
+          "registered_cameras": [
+            "cam_0",
+            "cam_1",
+            "cam_10",
+            "cam_11",
+            "cam_2",
+            "cam_3",
+            "cam_4",
+            "cam_5",
+            "cam_6",
+            "cam_7",
+            "cam_8",
+            "cam_9"
+          ],
+          "missing_cameras": [],
+          "contains_all_configured_cameras": true
+        }
+      ],
+      "selected_model_id": 0,
+      "products": {
+        "cameras_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/sfm/colmap/cameras.npz",
+        "cameras_mat": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/sfm/colmap/cameras.mat",
+        "cameras_json": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/sfm/colmap/cameras.json",
+        "cameras_txt": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/sfm/colmap/cameras.txt",
+        "sparse_points_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/sfm/colmap/sparse_points.npz",
+        "points3D_mat": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/sfm/colmap/points3D.mat",
+        "observations_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/sfm/colmap/observations.npz",
+        "sparse_points_ply": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/sfm/colmap/sparse_points.ply",
+        "camera_centers_ply": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/sfm/colmap/camera_centers.ply",
+        "sparse_scene": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/sfm/colmap/sparse_scene.png",
+        "camera_observations_3d": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/sfm/colmap/camera_observations_3d.png",
+        "camera_observations_2d": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/sfm/colmap/camera_observations_2d.png"
+      },
+      "figures": {
+        "sparse_scene": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/sfm/colmap/sparse_scene.png",
+        "camera_observations_3d": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/sfm/colmap/camera_observations_3d.png",
+        "camera_observations_2d": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/sfm/colmap/camera_observations_2d.png"
+      }
+    },
+    "scale": {
+      "ok": true,
+      "project": "CylinderDIC",
+      "method": "chessboard",
+      "sfm_dir": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/sfm/colmap",
+      "image_root": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/calibrate_images",
+      "output_dir": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/scale",
+      "errors": [],
+      "warnings": [],
+      "outputs": {
+        "scale_json": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/scale/sfm2world_scale.json",
+        "triangulation_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/scale/chessboard_triangulation.npz",
+        "detection_dir": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/scale/detections"
+      },
+      "scale": {
+        "scale_stat": "trimmed_mean",
+        "trim_fraction": 0.2,
+        "sfm_square_size_mean": 0.08431990655761433,
+        "sfm_square_size_selected": 0.08427840478742657,
+        "selected_pair_sfm_square_size_mean": 0.08431990655761433,
+        "sfm_square_size_median": 0.08436289906272104,
+        "sfm_square_size_std": 0.0008516314889762261,
+        "physical_square_size": 10.0,
+        "physical_square_size_unit": "mm",
+        "sfm_to_world_scale": 118.65435784199718,
+        "world_to_sfm_scale": 0.008427840478742657,
+        "unit": "physical_units_per_sfm_unit"
+      },
+      "quality": {
+        "num_detected_cameras": 5,
+        "num_triangulated_corners": 63,
+        "num_valid_corners": 63,
+        "num_valid_edges": 110,
+        "reprojection_error_px_mean": 0.1527789448573368,
+        "reprojection_error_px_median": 0.11658663732348395,
+        "reprojection_error_px_max": 0.4402792726092639,
+        "edge_cv": 0.010100005132172686,
+        "selected_pair_quality_score": 0.15570333791527372,
+        "num_candidate_pairs": 10,
+        "num_reliable_pairs": 10,
+        "max_pair_edge_cv": 0.08
+      },
+      "selected_pair": {
+        "camera_ids": [
+          2,
+          10
+        ],
+        "camera_names": [
+          "cam_2",
+          "cam_10"
+        ],
+        "pair_selection": "all_pairs",
+        "corner_order_second_view": "reverse_all",
+        "baseline_sfm": 6.923411389412825
+      },
+      "visible_cameras": [
+        "cam_0",
+        "cam_1",
+        "cam_2",
+        "cam_10",
+        "cam_11"
+      ]
+    },
+    "mask": {
+      "ok": true,
+      "project": "CylinderDIC",
+      "sfm_dir": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/sfm/colmap",
+      "output_dir": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/masks",
+      "user_mask_dir": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/masks",
+      "errors": [],
+      "warnings": [],
+      "mode": "auto",
+      "camera_count": 12,
+      "outputs": {
+        "mask_dir": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/masks/mask",
+        "overlay_dir": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/masks/overlay",
+        "debug_dir": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/masks/debug",
+        "meta_json": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/masks/auto_roi_meta.json",
+        "summary_png": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/masks/auto_roi_summary.png"
+      },
+      "cameras": [
+        {
+          "cam_id": 0,
+          "cam_name": "cam_0",
+          "mask_pixels": 407604,
+          "hull_pixels": 407822,
+          "supported_pixels": 298489,
+          "rejected_hole_pixels": 0,
+          "u_min": 401.0,
+          "u_max": 1038.0,
+          "v_min": 210.0,
+          "v_max": 884.0,
+          "n_observations": 878,
+          "n_points_after_outlier_filter": 800,
+          "n_triangles_raw": 1493,
+          "n_triangles_valid": 1397,
+          "n_holes_detected": 13,
+          "n_holes_filled_as_speckle": 13,
+          "n_holes_rejected": 0,
+          "reference_texture": {
+            "std": 28.127803802490234,
+            "lap_std": 191.23074340820312,
+            "grad_mean": 126.38753509521484
+          }
+        },
+        {
+          "cam_id": 1,
+          "cam_name": "cam_1",
+          "mask_pixels": 398870,
+          "hull_pixels": 398931,
+          "supported_pixels": 348780,
+          "rejected_hole_pixels": 0,
+          "u_min": 412.0,
+          "u_max": 1028.0,
+          "v_min": 203.0,
+          "v_max": 882.0,
+          "n_observations": 890,
+          "n_points_after_outlier_filter": 845,
+          "n_triangles_raw": 1575,
+          "n_triangles_valid": 1523,
+          "n_holes_detected": 9,
+          "n_holes_filled_as_speckle": 9,
+          "n_holes_rejected": 0,
+          "reference_texture": {
+            "std": 28.088857650756836,
+            "lap_std": 192.01231384277344,
+            "grad_mean": 126.37146759033203
+          }
+        },
+        {
+          "cam_id": 2,
+          "cam_name": "cam_2",
+          "mask_pixels": 409793,
+          "hull_pixels": 410108,
+          "supported_pixels": 358095,
+          "rejected_hole_pixels": 0,
+          "u_min": 401.0,
+          "u_max": 1031.0,
+          "v_min": 196.0,
+          "v_max": 886.0,
+          "n_observations": 933,
+          "n_points_after_outlier_filter": 887,
+          "n_triangles_raw": 1660,
+          "n_triangles_valid": 1599,
+          "n_holes_detected": 10,
+          "n_holes_filled_as_speckle": 10,
+          "n_holes_rejected": 0,
+          "reference_texture": {
+            "std": 29.410110473632812,
+            "lap_std": 200.84413146972656,
+            "grad_mean": 132.29165649414062
+          }
+        },
+        {
+          "cam_id": 3,
+          "cam_name": "cam_3",
+          "mask_pixels": 407035,
+          "hull_pixels": 407174,
+          "supported_pixels": 337151,
+          "rejected_hole_pixels": 0,
+          "u_min": 396.0,
+          "u_max": 1028.0,
+          "v_min": 200.0,
+          "v_max": 877.0,
+          "n_observations": 952,
+          "n_points_after_outlier_filter": 891,
+          "n_triangles_raw": 1644,
+          "n_triangles_valid": 1573,
+          "n_holes_detected": 11,
+          "n_holes_filled_as_speckle": 11,
+          "n_holes_rejected": 0,
+          "reference_texture": {
+            "std": 29.400110244750977,
+            "lap_std": 200.5336151123047,
+            "grad_mean": 132.58975219726562
+          }
+        },
+        {
+          "cam_id": 4,
+          "cam_name": "cam_4",
+          "mask_pixels": 403899,
+          "hull_pixels": 404539,
+          "supported_pixels": 354013,
+          "rejected_hole_pixels": 0,
+          "u_min": 397.0,
+          "u_max": 1030.0,
+          "v_min": 197.0,
+          "v_max": 884.0,
+          "n_observations": 946,
+          "n_points_after_outlier_filter": 890,
+          "n_triangles_raw": 1641,
+          "n_triangles_valid": 1581,
+          "n_holes_detected": 10,
+          "n_holes_filled_as_speckle": 10,
+          "n_holes_rejected": 0,
+          "reference_texture": {
+            "std": 29.386747360229492,
+            "lap_std": 200.22967529296875,
+            "grad_mean": 132.13772583007812
+          }
+        },
+        {
+          "cam_id": 5,
+          "cam_name": "cam_5",
+          "mask_pixels": 401410,
+          "hull_pixels": 402860,
+          "supported_pixels": 322341,
+          "rejected_hole_pixels": 0,
+          "u_min": 409.0,
+          "u_max": 1032.0,
+          "v_min": 197.0,
+          "v_max": 878.0,
+          "n_observations": 914,
+          "n_points_after_outlier_filter": 844,
+          "n_triangles_raw": 1566,
+          "n_triangles_valid": 1490,
+          "n_holes_detected": 10,
+          "n_holes_filled_as_speckle": 10,
+          "n_holes_rejected": 0,
+          "reference_texture": {
+            "std": 29.649858474731445,
+            "lap_std": 201.5374755859375,
+            "grad_mean": 133.11862182617188
+          }
+        },
+        {
+          "cam_id": 6,
+          "cam_name": "cam_6",
+          "mask_pixels": 405126,
+          "hull_pixels": 405647,
+          "supported_pixels": 306012,
+          "rejected_hole_pixels": 0,
+          "u_min": 400.0,
+          "u_max": 1024.0,
+          "v_min": 198.0,
+          "v_max": 882.0,
+          "n_observations": 918,
+          "n_points_after_outlier_filter": 837,
+          "n_triangles_raw": 1573,
+          "n_triangles_valid": 1483,
+          "n_holes_detected": 14,
+          "n_holes_filled_as_speckle": 14,
+          "n_holes_rejected": 0,
+          "reference_texture": {
+            "std": 32.628780364990234,
+            "lap_std": 222.10614013671875,
+            "grad_mean": 147.03831481933594
+          }
+        },
+        {
+          "cam_id": 7,
+          "cam_name": "cam_7",
+          "mask_pixels": 402105,
+          "hull_pixels": 402323,
+          "supported_pixels": 291677,
+          "rejected_hole_pixels": 0,
+          "u_min": 410.0,
+          "u_max": 1033.0,
+          "v_min": 207.0,
+          "v_max": 874.0,
+          "n_observations": 919,
+          "n_points_after_outlier_filter": 849,
+          "n_triangles_raw": 1599,
+          "n_triangles_valid": 1499,
+          "n_holes_detected": 10,
+          "n_holes_filled_as_speckle": 10,
+          "n_holes_rejected": 0,
+          "reference_texture": {
+            "std": 30.648950576782227,
+            "lap_std": 209.2654571533203,
+            "grad_mean": 138.1289520263672
+          }
+        },
+        {
+          "cam_id": 8,
+          "cam_name": "cam_8",
+          "mask_pixels": 400622,
+          "hull_pixels": 401103,
+          "supported_pixels": 328122,
+          "rejected_hole_pixels": 0,
+          "u_min": 413.0,
+          "u_max": 1022.0,
+          "v_min": 196.0,
+          "v_max": 882.0,
+          "n_observations": 933,
+          "n_points_after_outlier_filter": 863,
+          "n_triangles_raw": 1596,
+          "n_triangles_valid": 1518,
+          "n_holes_detected": 11,
+          "n_holes_filled_as_speckle": 11,
+          "n_holes_rejected": 0,
+          "reference_texture": {
+            "std": 30.386919021606445,
+            "lap_std": 207.1470947265625,
+            "grad_mean": 136.81089782714844
+          }
+        },
+        {
+          "cam_id": 9,
+          "cam_name": "cam_9",
+          "mask_pixels": 406437,
+          "hull_pixels": 407943,
+          "supported_pixels": 304770,
+          "rejected_hole_pixels": 0,
+          "u_min": 406.0,
+          "u_max": 1029.0,
+          "v_min": 194.0,
+          "v_max": 881.0,
+          "n_observations": 924,
+          "n_points_after_outlier_filter": 849,
+          "n_triangles_raw": 1574,
+          "n_triangles_valid": 1472,
+          "n_holes_detected": 12,
+          "n_holes_filled_as_speckle": 12,
+          "n_holes_rejected": 0,
+          "reference_texture": {
+            "std": 28.260217666625977,
+            "lap_std": 192.7902374267578,
+            "grad_mean": 127.64647674560547
+          }
+        },
+        {
+          "cam_id": 10,
+          "cam_name": "cam_10",
+          "mask_pixels": 405718,
+          "hull_pixels": 406171,
+          "supported_pixels": 328518,
+          "rejected_hole_pixels": 0,
+          "u_min": 406.0,
+          "u_max": 1032.0,
+          "v_min": 202.0,
+          "v_max": 882.0,
+          "n_observations": 890,
+          "n_points_after_outlier_filter": 831,
+          "n_triangles_raw": 1531,
+          "n_triangles_valid": 1456,
+          "n_holes_detected": 12,
+          "n_holes_filled_as_speckle": 12,
+          "n_holes_rejected": 0,
+          "reference_texture": {
+            "std": 28.195127487182617,
+            "lap_std": 191.55357360839844,
+            "grad_mean": 126.2323989868164
+          }
+        },
+        {
+          "cam_id": 11,
+          "cam_name": "cam_11",
+          "mask_pixels": 401144,
+          "hull_pixels": 401512,
+          "supported_pixels": 310082,
+          "rejected_hole_pixels": 0,
+          "u_min": 410.0,
+          "u_max": 1028.0,
+          "v_min": 201.0,
+          "v_max": 888.0,
+          "n_observations": 876,
+          "n_points_after_outlier_filter": 809,
+          "n_triangles_raw": 1512,
+          "n_triangles_valid": 1429,
+          "n_holes_detected": 9,
+          "n_holes_filled_as_speckle": 9,
+          "n_holes_rejected": 0,
+          "reference_texture": {
+            "std": 27.996347427368164,
+            "lap_std": 190.8948211669922,
+            "grad_mean": 125.5898666381836
+          }
+        }
+      ]
+    },
+    "dic2d": {
+      "ok": true,
+      "project": "CylinderDIC",
+      "engine": "ncorr",
+      "output_dir": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/dic2d",
+      "errors": [],
+      "warnings": [],
+      "cameras": [
+        {
+          "cam_id": 0,
+          "cam_name": "cam_0",
+          "roi_mode": "auto_mask",
+          "roi_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/masks/mask/cam_0_mask.npy",
+          "observation_xy": [
+            419.43389892578125,
+            232.0878143310547
+          ],
+          "seed_xy": [
+            420.0,
+            234.0
+          ],
+          "reference_grid_points": 11325,
+          "roi_min_region_area": 2000,
+          "native_cli": "/mnt/c/01project/Multi-DIC/build/wsl-native/ncorr/ncorr_cli",
+          "frames": [
+            {
+              "reference_frame": "001.bmp",
+              "deformed_frame": "002.bmp",
+              "reference_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/images/cam_0/001.bmp",
+              "deformed_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/images/cam_0/002.bmp",
+              "ok": true,
+              "output_schema_version": 2,
+              "message": "Reduced-grid DIC2D displacement field computed with no-GUI RG propagation and six-parameter affine IC-GN refinement.",
+              "reduced_width": 240,
+              "reduced_height": 180,
+              "roi_region_count": 1,
+              "seed_region": 0,
+              "seed_paramvector": [
+                420,
+                234,
+                -2.14161,
+                -0.253069,
+                0.0113908,
+                0.0058277,
+                -0.0117219,
+                -0.000777334,
+                0.844356
+              ],
+              "reference_grid_points": 11325,
+              "valid_points": 11325,
+              "output_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/dic2d/dic2d_cam_0_002.npz",
+              "valid_ratio": 0.2621527777777778,
+              "mean_corrcoef": 0.8487516999636672,
+              "median_corrcoef": 0.8456315614901018,
+              "failed_points": 31875,
+              "status": "native_affine_grid_dic",
+              "returncode": 0
+            }
+          ],
+          "status": "native_affine_grid_dic"
+        },
+        {
+          "cam_id": 1,
+          "cam_name": "cam_1",
+          "roi_mode": "auto_mask",
+          "roi_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/masks/mask/cam_1_mask.npy",
+          "observation_xy": [
+            522.4979858398438,
+            202.58106994628906
+          ],
+          "seed_xy": [
+            522.0,
+            204.0
+          ],
+          "reference_grid_points": 11088,
+          "roi_min_region_area": 2000,
+          "native_cli": "/mnt/c/01project/Multi-DIC/build/wsl-native/ncorr/ncorr_cli",
+          "frames": [
+            {
+              "reference_frame": "001.bmp",
+              "deformed_frame": "002.bmp",
+              "reference_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/images/cam_1/001.bmp",
+              "deformed_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/images/cam_1/002.bmp",
+              "ok": true,
+              "output_schema_version": 2,
+              "message": "Reduced-grid DIC2D displacement field computed with no-GUI RG propagation and six-parameter affine IC-GN refinement.",
+              "reduced_width": 240,
+              "reduced_height": 180,
+              "roi_region_count": 1,
+              "seed_region": 0,
+              "seed_paramvector": [
+                522,
+                204,
+                -1.51823,
+                -0.452086,
+                0.00226235,
+                -0.000536026,
+                -0.0169111,
+                0.0138055,
+                0.806203
+              ],
+              "reference_grid_points": 11088,
+              "valid_points": 11088,
+              "output_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/dic2d/dic2d_cam_1_002.npz",
+              "valid_ratio": 0.25666666666666665,
+              "mean_corrcoef": 0.8499134837812672,
+              "median_corrcoef": 0.8482670143346043,
+              "failed_points": 32112,
+              "status": "native_affine_grid_dic",
+              "returncode": 0
+            }
+          ],
+          "status": "native_affine_grid_dic"
+        },
+        {
+          "cam_id": 2,
+          "cam_name": "cam_2",
+          "roi_mode": "auto_mask",
+          "roi_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/masks/mask/cam_2_mask.npy",
+          "observation_xy": [
+            490.6517028808594,
+            214.12770080566406
+          ],
+          "seed_xy": [
+            492.0,
+            216.0
+          ],
+          "reference_grid_points": 11374,
+          "roi_min_region_area": 2000,
+          "native_cli": "/mnt/c/01project/Multi-DIC/build/wsl-native/ncorr/ncorr_cli",
+          "frames": [
+            {
+              "reference_frame": "001.bmp",
+              "deformed_frame": "002.bmp",
+              "reference_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/images/cam_2/001.bmp",
+              "deformed_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/images/cam_2/002.bmp",
+              "ok": true,
+              "output_schema_version": 2,
+              "message": "Reduced-grid DIC2D displacement field computed with no-GUI RG propagation and six-parameter affine IC-GN refinement.",
+              "reduced_width": 240,
+              "reduced_height": 180,
+              "roi_region_count": 1,
+              "seed_region": 0,
+              "seed_paramvector": [
+                492,
+                216,
+                -1.74464,
+                -0.311896,
+                0.0127323,
+                -0.00760703,
+                -0.00363483,
+                0.0110315,
+                0.835918
+              ],
+              "reference_grid_points": 11374,
+              "valid_points": 11374,
+              "output_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/dic2d/dic2d_cam_2_002.npz",
+              "valid_ratio": 0.26328703703703704,
+              "mean_corrcoef": 0.849464973985983,
+              "median_corrcoef": 0.8490679544896946,
+              "failed_points": 31826,
+              "status": "native_affine_grid_dic",
+              "returncode": 0
+            }
+          ],
+          "status": "native_affine_grid_dic"
+        },
+        {
+          "cam_id": 3,
+          "cam_name": "cam_3",
+          "roi_mode": "auto_mask",
+          "roi_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/masks/mask/cam_3_mask.npy",
+          "observation_xy": [
+            982.4886474609375,
+            231.02639770507812
+          ],
+          "seed_xy": [
+            984.0,
+            234.0
+          ],
+          "reference_grid_points": 11337,
+          "roi_min_region_area": 2000,
+          "native_cli": "/mnt/c/01project/Multi-DIC/build/wsl-native/ncorr/ncorr_cli",
+          "frames": [
+            {
+              "reference_frame": "001.bmp",
+              "deformed_frame": "002.bmp",
+              "reference_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/images/cam_3/001.bmp",
+              "deformed_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/images/cam_3/002.bmp",
+              "ok": true,
+              "output_schema_version": 2,
+              "message": "Reduced-grid DIC2D displacement field computed with no-GUI RG propagation and six-parameter affine IC-GN refinement.",
+              "reduced_width": 240,
+              "reduced_height": 180,
+              "roi_region_count": 1,
+              "seed_region": 0,
+              "seed_paramvector": [
+                984,
+                234,
+                1.89739,
+                -0.322395,
+                0.010296,
+                -0.00169069,
+                0.0163546,
+                0.00486168,
+                0.850514
+              ],
+              "reference_grid_points": 11337,
+              "valid_points": 11337,
+              "output_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/dic2d/dic2d_cam_3_002.npz",
+              "valid_ratio": 0.26243055555555556,
+              "mean_corrcoef": 0.8502088154834382,
+              "median_corrcoef": 0.8464825605591926,
+              "failed_points": 31863,
+              "status": "native_affine_grid_dic",
+              "returncode": 0
+            }
+          ],
+          "status": "native_affine_grid_dic"
+        },
+        {
+          "cam_id": 4,
+          "cam_name": "cam_4",
+          "roi_mode": "auto_mask",
+          "roi_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/masks/mask/cam_4_mask.npy",
+          "observation_xy": [
+            942.6715087890625,
+            213.98516845703125
+          ],
+          "seed_xy": [
+            942.0,
+            216.0
+          ],
+          "reference_grid_points": 11223,
+          "roi_min_region_area": 2000,
+          "native_cli": "/mnt/c/01project/Multi-DIC/build/wsl-native/ncorr/ncorr_cli",
+          "frames": [
+            {
+              "reference_frame": "001.bmp",
+              "deformed_frame": "002.bmp",
+              "reference_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/images/cam_4/001.bmp",
+              "deformed_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/images/cam_4/002.bmp",
+              "ok": true,
+              "output_schema_version": 2,
+              "message": "Reduced-grid DIC2D displacement field computed with no-GUI RG propagation and six-parameter affine IC-GN refinement.",
+              "reduced_width": 240,
+              "reduced_height": 180,
+              "roi_region_count": 1,
+              "seed_region": 0,
+              "seed_paramvector": [
+                942,
+                216,
+                1.57118,
+                -0.311758,
+                0.000370658,
+                -0.0045291,
+                -0.00301204,
+                -0.00297537,
+                0.801726
+              ],
+              "reference_grid_points": 11223,
+              "valid_points": 11223,
+              "output_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/dic2d/dic2d_cam_4_002.npz",
+              "valid_ratio": 0.25979166666666664,
+              "mean_corrcoef": 0.8499328969734377,
+              "median_corrcoef": 0.8495505067724977,
+              "failed_points": 31977,
+              "status": "native_affine_grid_dic",
+              "returncode": 0
+            }
+          ],
+          "status": "native_affine_grid_dic"
+        },
+        {
+          "cam_id": 5,
+          "cam_name": "cam_5",
+          "roi_mode": "auto_mask",
+          "roi_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/masks/mask/cam_5_mask.npy",
+          "observation_xy": [
+            951.35888671875,
+            224.6606903076172
+          ],
+          "seed_xy": [
+            954.0,
+            222.0
+          ],
+          "reference_grid_points": 11154,
+          "roi_min_region_area": 2000,
+          "native_cli": "/mnt/c/01project/Multi-DIC/build/wsl-native/ncorr/ncorr_cli",
+          "frames": [
+            {
+              "reference_frame": "001.bmp",
+              "deformed_frame": "002.bmp",
+              "reference_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/images/cam_5/001.bmp",
+              "deformed_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/images/cam_5/002.bmp",
+              "ok": true,
+              "output_schema_version": 2,
+              "message": "Reduced-grid DIC2D displacement field computed with no-GUI RG propagation and six-parameter affine IC-GN refinement.",
+              "reduced_width": 240,
+              "reduced_height": 180,
+              "roi_region_count": 1,
+              "seed_region": 0,
+              "seed_paramvector": [
+                954,
+                222,
+                1.7566,
+                -0.372247,
+                0.00628948,
+                0.00499173,
+                0.00125825,
+                0.00253217,
+                0.805483
+              ],
+              "reference_grid_points": 11154,
+              "valid_points": 11154,
+              "output_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/dic2d/dic2d_cam_5_002.npz",
+              "valid_ratio": 0.25819444444444445,
+              "mean_corrcoef": 0.8522135553606981,
+              "median_corrcoef": 0.8501396529361809,
+              "failed_points": 32046,
+              "status": "native_affine_grid_dic",
+              "returncode": 0
+            }
+          ],
+          "status": "native_affine_grid_dic"
+        },
+        {
+          "cam_id": 6,
+          "cam_name": "cam_6",
+          "roi_mode": "auto_mask",
+          "roi_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/masks/mask/cam_6_mask.npy",
+          "observation_xy": [
+            455.6173400878906,
+            227.7122039794922
+          ],
+          "seed_xy": [
+            456.0,
+            228.0
+          ],
+          "reference_grid_points": 11248,
+          "roi_min_region_area": 2000,
+          "native_cli": "/mnt/c/01project/Multi-DIC/build/wsl-native/ncorr/ncorr_cli",
+          "frames": [
+            {
+              "reference_frame": "001.bmp",
+              "deformed_frame": "002.bmp",
+              "reference_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/images/cam_6/001.bmp",
+              "deformed_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/images/cam_6/002.bmp",
+              "ok": true,
+              "output_schema_version": 2,
+              "message": "Reduced-grid DIC2D displacement field computed with no-GUI RG propagation and six-parameter affine IC-GN refinement.",
+              "reduced_width": 240,
+              "reduced_height": 180,
+              "roi_region_count": 1,
+              "seed_region": 0,
+              "seed_paramvector": [
+                456,
+                228,
+                -2.00643,
+                -0.229233,
+                2.00437e-05,
+                0.000368856,
+                -0.000871612,
+                0.00745928,
+                0.8917
+              ],
+              "reference_grid_points": 11248,
+              "valid_points": 11248,
+              "output_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/dic2d/dic2d_cam_6_002.npz",
+              "valid_ratio": 0.26037037037037036,
+              "mean_corrcoef": 0.84984466107176,
+              "median_corrcoef": 0.8469715365405208,
+              "failed_points": 31952,
+              "status": "native_affine_grid_dic",
+              "returncode": 0
+            }
+          ],
+          "status": "native_affine_grid_dic"
+        },
+        {
+          "cam_id": 7,
+          "cam_name": "cam_7",
+          "roi_mode": "auto_mask",
+          "roi_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/masks/mask/cam_7_mask.npy",
+          "observation_xy": [
+            974.4830932617188,
+            210.39308166503906
+          ],
+          "seed_xy": [
+            972.0,
+            210.0
+          ],
+          "reference_grid_points": 11141,
+          "roi_min_region_area": 2000,
+          "native_cli": "/mnt/c/01project/Multi-DIC/build/wsl-native/ncorr/ncorr_cli",
+          "frames": [
+            {
+              "reference_frame": "001.bmp",
+              "deformed_frame": "002.bmp",
+              "reference_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/images/cam_7/001.bmp",
+              "deformed_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/images/cam_7/002.bmp",
+              "ok": true,
+              "output_schema_version": 2,
+              "message": "Reduced-grid DIC2D displacement field computed with no-GUI RG propagation and six-parameter affine IC-GN refinement.",
+              "reduced_width": 240,
+              "reduced_height": 180,
+              "roi_region_count": 1,
+              "seed_region": 0,
+              "seed_paramvector": [
+                972,
+                210,
+                1.91228,
+                -0.256592,
+                0.00475018,
+                -0.0128014,
+                -0.00298314,
+                -0.00688214,
+                0.847375
+              ],
+              "reference_grid_points": 11141,
+              "valid_points": 11141,
+              "output_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/dic2d/dic2d_cam_7_002.npz",
+              "valid_ratio": 0.2578935185185185,
+              "mean_corrcoef": 0.8494050904066734,
+              "median_corrcoef": 0.8473532609357712,
+              "failed_points": 32059,
+              "status": "native_affine_grid_dic",
+              "returncode": 0
+            }
+          ],
+          "status": "native_affine_grid_dic"
+        },
+        {
+          "cam_id": 8,
+          "cam_name": "cam_8",
+          "roi_mode": "auto_mask",
+          "roi_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/masks/mask/cam_8_mask.npy",
+          "observation_xy": [
+            488.6775817871094,
+            203.2285614013672
+          ],
+          "seed_xy": [
+            492.0,
+            204.0
+          ],
+          "reference_grid_points": 11156,
+          "roi_min_region_area": 2000,
+          "native_cli": "/mnt/c/01project/Multi-DIC/build/wsl-native/ncorr/ncorr_cli",
+          "frames": [
+            {
+              "reference_frame": "001.bmp",
+              "deformed_frame": "002.bmp",
+              "reference_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/images/cam_8/001.bmp",
+              "deformed_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/images/cam_8/002.bmp",
+              "ok": true,
+              "output_schema_version": 2,
+              "message": "Reduced-grid DIC2D displacement field computed with no-GUI RG propagation and six-parameter affine IC-GN refinement.",
+              "reduced_width": 240,
+              "reduced_height": 180,
+              "roi_region_count": 1,
+              "seed_region": 0,
+              "seed_paramvector": [
+                492,
+                204,
+                -1.63076,
+                -0.449855,
+                -0.00136591,
+                0.00108776,
+                -0.00326353,
+                0.0055867,
+                0.824123
+              ],
+              "reference_grid_points": 11156,
+              "valid_points": 11156,
+              "output_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/dic2d/dic2d_cam_8_002.npz",
+              "valid_ratio": 0.2582407407407407,
+              "mean_corrcoef": 0.8503978282917518,
+              "median_corrcoef": 0.848192102132941,
+              "failed_points": 32044,
+              "status": "native_affine_grid_dic",
+              "returncode": 0
+            }
+          ],
+          "status": "native_affine_grid_dic"
+        },
+        {
+          "cam_id": 9,
+          "cam_name": "cam_9",
+          "roi_mode": "auto_mask",
+          "roi_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/masks/mask/cam_9_mask.npy",
+          "observation_xy": [
+            755.7139282226562,
+            203.64691162109375
+          ],
+          "seed_xy": [
+            756.0,
+            204.0
+          ],
+          "reference_grid_points": 11289,
+          "roi_min_region_area": 2000,
+          "native_cli": "/mnt/c/01project/Multi-DIC/build/wsl-native/ncorr/ncorr_cli",
+          "frames": [
+            {
+              "reference_frame": "001.bmp",
+              "deformed_frame": "002.bmp",
+              "reference_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/images/cam_9/001.bmp",
+              "deformed_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/images/cam_9/002.bmp",
+              "ok": true,
+              "output_schema_version": 2,
+              "message": "Reduced-grid DIC2D displacement field computed with no-GUI RG propagation and six-parameter affine IC-GN refinement.",
+              "reduced_width": 240,
+              "reduced_height": 180,
+              "roi_region_count": 1,
+              "seed_region": 0,
+              "seed_paramvector": [
+                756,
+                204,
+                0.280507,
+                -0.324761,
+                0.00847992,
+                -0.00655755,
+                0.00689621,
+                0.00230212,
+                0.841092
+              ],
+              "reference_grid_points": 11289,
+              "valid_points": 11289,
+              "output_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/dic2d/dic2d_cam_9_002.npz",
+              "valid_ratio": 0.26131944444444444,
+              "mean_corrcoef": 0.8485939883589668,
+              "median_corrcoef": 0.8454029235358803,
+              "failed_points": 31911,
+              "status": "native_affine_grid_dic",
+              "returncode": 0
+            }
+          ],
+          "status": "native_affine_grid_dic"
+        },
+        {
+          "cam_id": 10,
+          "cam_name": "cam_10",
+          "roi_mode": "auto_mask",
+          "roi_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/masks/mask/cam_10_mask.npy",
+          "observation_xy": [
+            940.4850463867188,
+            202.16819763183594
+          ],
+          "seed_xy": [
+            942.0,
+            204.0
+          ],
+          "reference_grid_points": 11273,
+          "roi_min_region_area": 2000,
+          "native_cli": "/mnt/c/01project/Multi-DIC/build/wsl-native/ncorr/ncorr_cli",
+          "frames": [
+            {
+              "reference_frame": "001.bmp",
+              "deformed_frame": "002.bmp",
+              "reference_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/images/cam_10/001.bmp",
+              "deformed_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/images/cam_10/002.bmp",
+              "ok": true,
+              "output_schema_version": 2,
+              "message": "Reduced-grid DIC2D displacement field computed with no-GUI RG propagation and six-parameter affine IC-GN refinement.",
+              "reduced_width": 240,
+              "reduced_height": 180,
+              "roi_region_count": 1,
+              "seed_region": 0,
+              "seed_paramvector": [
+                942,
+                204,
+                1.64097,
+                -0.496223,
+                0.0108005,
+                -0.0122047,
+                0.0203494,
+                0.0249501,
+                0.838237
+              ],
+              "reference_grid_points": 11273,
+              "valid_points": 11273,
+              "output_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/dic2d/dic2d_cam_10_002.npz",
+              "valid_ratio": 0.2609490740740741,
+              "mean_corrcoef": 0.8508803655689117,
+              "median_corrcoef": 0.8477296008887278,
+              "failed_points": 31927,
+              "status": "native_affine_grid_dic",
+              "returncode": 0
+            }
+          ],
+          "status": "native_affine_grid_dic"
+        },
+        {
+          "cam_id": 11,
+          "cam_name": "cam_11",
+          "roi_mode": "auto_mask",
+          "roi_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/masks/mask/cam_11_mask.npy",
+          "observation_xy": [
+            965.9141845703125,
+            217.5376739501953
+          ],
+          "seed_xy": [
+            966.0,
+            216.0
+          ],
+          "reference_grid_points": 11126,
+          "roi_min_region_area": 2000,
+          "native_cli": "/mnt/c/01project/Multi-DIC/build/wsl-native/ncorr/ncorr_cli",
+          "frames": [
+            {
+              "reference_frame": "001.bmp",
+              "deformed_frame": "002.bmp",
+              "reference_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/images/cam_11/001.bmp",
+              "deformed_path": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/images/cam_11/002.bmp",
+              "ok": true,
+              "output_schema_version": 2,
+              "message": "Reduced-grid DIC2D displacement field computed with no-GUI RG propagation and six-parameter affine IC-GN refinement.",
+              "reduced_width": 240,
+              "reduced_height": 180,
+              "roi_region_count": 1,
+              "seed_region": 0,
+              "seed_paramvector": [
+                966,
+                216,
+                1.71514,
+                -0.314784,
+                0.0153879,
+                0.00294694,
+                0.00453717,
+                -0.0124916,
+                0.804281
+              ],
+              "reference_grid_points": 11126,
+              "valid_points": 11126,
+              "output_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/dic2d/dic2d_cam_11_002.npz",
+              "valid_ratio": 0.2575462962962963,
+              "mean_corrcoef": 0.84764147384638,
+              "median_corrcoef": 0.8438550617183057,
+              "failed_points": 32074,
+              "status": "native_affine_grid_dic",
+              "returncode": 0
+            }
+          ],
+          "status": "native_affine_grid_dic"
+        }
+      ],
+      "native_status": "affine_grid_dic",
+      "message": "ROI, seed, and per-frame reduced-grid DIC2D outputs are prepared with native six-parameter affine IC-GN refinement."
+    },
+    "recon3d": {
+      "ok": true,
+      "project": "CylinderDIC",
+      "method": "sfm_track_anchored",
+      "backend": "native_recon3d",
+      "sfm_dir": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/sfm/colmap",
+      "dic2d_dir": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/dic2d",
+      "output_dir": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d",
+      "frames": [
+        {
+          "ok": true,
+          "frame": "002.bmp",
+          "output_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/recon3d_002.npz",
+          "output_ply": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/recon3d_002.ply",
+          "num_tracks_total": 3606,
+          "num_tracks_valid": 3548,
+          "valid_ratio": 0.9839156960621187,
+          "scale": 118.65435784199718,
+          "min_views": 2,
+          "min_corrcoef": 0.6,
+          "max_reprojection_error_px": 2.0,
+          "mean_views": 2.9780157835400227,
+          "mean_corrcoef": 0.8487211436278834,
+          "median_displacement_norm": 0.4986629583621337,
+          "outlier_filter": {
+            "enabled": true,
+            "initial_valid": 3549,
+            "removed": 1,
+            "final_valid": 3548,
+            "removed_ratio": 0.0002817695125387433
+          },
+          "qc": {
+            "displacement_norm": {
+              "count": 3548,
+              "mean": 0.4989963695608484,
+              "std": 0.012198780445537738,
+              "min": 0.43946863562023797,
+              "p05": 0.4808093994291823,
+              "p25": 0.4913984607377643,
+              "median": 0.4986629583621337,
+              "p75": 0.5063375031670467,
+              "p95": 0.5179819466795998,
+              "max": 0.5824671137653066
+            },
+            "reprojection_error_ref": {
+              "count": 3548,
+              "mean": 0.3084102372269053,
+              "std": 0.20416781923907826,
+              "min": 0.000647253010673609,
+              "p05": 0.07643014164174727,
+              "p25": 0.17192234418010938,
+              "median": 0.26617202897321623,
+              "p75": 0.3883099862898216,
+              "p95": 0.6888578863670005,
+              "max": 1.9824336151101536
+            },
+            "reprojection_error_def": {
+              "count": 3548,
+              "mean": 0.3101960416201097,
+              "std": 0.20448683734775894,
+              "min": 0.003836079291235544,
+              "p05": 0.08015309820227055,
+              "p25": 0.17211460541529855,
+              "median": 0.26563871610443546,
+              "p75": 0.3924078711227716,
+              "p95": 0.6921414770662035,
+              "max": 1.963429919354126
+            },
+            "mean_corrcoef": {
+              "count": 3548,
+              "mean": 0.8487211436278834,
+              "std": 0.03679430892673041,
+              "min": 0.748371510046469,
+              "p05": 0.7919670962063724,
+              "p25": 0.8199409478389671,
+              "median": 0.8457720728736277,
+              "p75": 0.8786755577209354,
+              "p95": 0.9096841372571032,
+              "max": 0.9579996827112769
+            },
+            "num_views": {
+              "count": 3548,
+              "mean": 2.9780157835400227,
+              "std": 0.28603597935761377,
+              "min": 2.0,
+              "p05": 2.0,
+              "p25": 3.0,
+              "median": 3.0,
+              "p75": 3.0,
+              "p95": 3.0,
+              "max": 5.0
+            },
+            "num_views_histogram": {
+              "2": 181,
+              "3": 3268,
+              "4": 95,
+              "5": 4
+            },
+            "camera_contributions": [
+              {
+                "cam_id": 0,
+                "cam_name": "cam_0",
+                "observed_tracks": 878,
+                "valid_reconstructed_tracks": 866,
+                "valid_ratio": 0.9863325740318907
+              },
+              {
+                "cam_id": 1,
+                "cam_name": "cam_1",
+                "observed_tracks": 890,
+                "valid_reconstructed_tracks": 877,
+                "valid_ratio": 0.9853932584269663
+              },
+              {
+                "cam_id": 2,
+                "cam_name": "cam_2",
+                "observed_tracks": 933,
+                "valid_reconstructed_tracks": 914,
+                "valid_ratio": 0.9796355841371919
+              },
+              {
+                "cam_id": 3,
+                "cam_name": "cam_3",
+                "observed_tracks": 952,
+                "valid_reconstructed_tracks": 934,
+                "valid_ratio": 0.9810924369747899
+              },
+              {
+                "cam_id": 4,
+                "cam_name": "cam_4",
+                "observed_tracks": 946,
+                "valid_reconstructed_tracks": 930,
+                "valid_ratio": 0.9830866807610994
+              },
+              {
+                "cam_id": 5,
+                "cam_name": "cam_5",
+                "observed_tracks": 914,
+                "valid_reconstructed_tracks": 901,
+                "valid_ratio": 0.9857768052516411
+              },
+              {
+                "cam_id": 6,
+                "cam_name": "cam_6",
+                "observed_tracks": 918,
+                "valid_reconstructed_tracks": 898,
+                "valid_ratio": 0.9782135076252724
+              },
+              {
+                "cam_id": 7,
+                "cam_name": "cam_7",
+                "observed_tracks": 919,
+                "valid_reconstructed_tracks": 902,
+                "valid_ratio": 0.9815016322089227
+              },
+              {
+                "cam_id": 8,
+                "cam_name": "cam_8",
+                "observed_tracks": 933,
+                "valid_reconstructed_tracks": 917,
+                "valid_ratio": 0.9828510182207931
+              },
+              {
+                "cam_id": 9,
+                "cam_name": "cam_9",
+                "observed_tracks": 924,
+                "valid_reconstructed_tracks": 913,
+                "valid_ratio": 0.9880952380952381
+              },
+              {
+                "cam_id": 10,
+                "cam_name": "cam_10",
+                "observed_tracks": 890,
+                "valid_reconstructed_tracks": 879,
+                "valid_ratio": 0.9876404494382023
+              },
+              {
+                "cam_id": 11,
+                "cam_name": "cam_11",
+                "observed_tracks": 876,
+                "valid_reconstructed_tracks": 866,
+                "valid_ratio": 0.9885844748858448
+              }
+            ]
+          },
+          "qc_outputs": {
+            "displacement_norm_histogram": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/qc/002/002_displacement_norm_hist.png",
+            "reprojection_error_histogram": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/qc/002/002_reprojection_error_hist.png",
+            "corrcoef_histogram": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/qc/002/002_corrcoef_hist.png",
+            "num_views_histogram": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/qc/002/002_num_views_hist.png",
+            "camera_contributions": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/qc/002/002_camera_contributions.png",
+            "points_ref_colored_ply": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/qc/002/002_points_ref_colored.ply",
+            "displacement_vectors_ply": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/qc/002/002_displacement_vectors.ply"
+          },
+          "pair_selection": {
+            "mode": "auto_spatial",
+            "pairs": [
+              [
+                "cam_9",
+                "cam_8"
+              ],
+              [
+                "cam_8",
+                "cam_7"
+              ],
+              [
+                "cam_7",
+                "cam_6"
+              ],
+              [
+                "cam_6",
+                "cam_5"
+              ],
+              [
+                "cam_5",
+                "cam_4"
+              ],
+              [
+                "cam_4",
+                "cam_3"
+              ],
+              [
+                "cam_3",
+                "cam_2"
+              ],
+              [
+                "cam_2",
+                "cam_1"
+              ],
+              [
+                "cam_1",
+                "cam_0"
+              ],
+              [
+                "cam_0",
+                "cam_11"
+              ],
+              [
+                "cam_11",
+                "cam_10"
+              ],
+              [
+                "cam_10",
+                "cam_9"
+              ]
+            ],
+            "spatial_order": [
+              "cam_9",
+              "cam_8",
+              "cam_7",
+              "cam_6",
+              "cam_5",
+              "cam_4",
+              "cam_3",
+              "cam_2",
+              "cam_1",
+              "cam_0",
+              "cam_11",
+              "cam_10"
+            ],
+            "circularity": 0.9780827490141979,
+            "is_circular": true,
+            "median_adjacent_distance": 2.074523883136053,
+            "wrap_distance": 2.0767103150520207,
+            "wrap_distance_ratio": 1.0010539439597401,
+            "median_adjacent_shared_tracks": 593.0,
+            "wrap_shared_tracks": 597,
+            "thresholds": {
+              "auto_circularity_threshold": 0.45,
+              "auto_wrap_distance_ratio": 1.8,
+              "auto_wrap_min_shared_ratio": 0.35,
+              "auto_max_neighbor_distance_ratio": 2.0,
+              "auto_min_shared_tracks": 20
+            }
+          },
+          "pair_surfaces": [
+            {
+              "pair_index": 0,
+              "camera_pair": [
+                "cam_9",
+                "cam_8"
+              ],
+              "output_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/pairs/002/pair_cam_9_cam_8_002.npz",
+              "output_ply": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/pairs/002/pair_cam_9_cam_8_002.ply",
+              "post_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/post/002/pair_cam_9_cam_8_002_post.npz",
+              "num_points": 581,
+              "num_valid_points": 581,
+              "num_faces": 1024,
+              "num_valid_faces": 1024,
+              "outlier_filter": {
+                "enabled": true,
+                "initial_valid": 581,
+                "removed": 0,
+                "final_valid": 581,
+                "removed_ratio": 0.0
+              },
+              "mean_corr_comb": 0.8231293632789135,
+              "median_displacement_arbm_norm": 0.13253584988610798,
+              "median_Eeq": 0.00479613847861771
+            },
+            {
+              "pair_index": 1,
+              "camera_pair": [
+                "cam_8",
+                "cam_7"
+              ],
+              "output_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/pairs/002/pair_cam_8_cam_7_002.npz",
+              "output_ply": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/pairs/002/pair_cam_8_cam_7_002.ply",
+              "post_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/post/002/pair_cam_8_cam_7_002_post.npz",
+              "num_points": 576,
+              "num_valid_points": 576,
+              "num_faces": 1049,
+              "num_valid_faces": 1049,
+              "outlier_filter": {
+                "enabled": true,
+                "initial_valid": 576,
+                "removed": 0,
+                "final_valid": 576,
+                "removed_ratio": 0.0
+              },
+              "mean_corr_comb": 0.819233600707022,
+              "median_displacement_arbm_norm": 0.12301008252922405,
+              "median_Eeq": 0.004787946196403629
+            },
+            {
+              "pair_index": 2,
+              "camera_pair": [
+                "cam_7",
+                "cam_6"
+              ],
+              "output_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/pairs/002/pair_cam_7_cam_6_002.npz",
+              "output_ply": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/pairs/002/pair_cam_7_cam_6_002.ply",
+              "post_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/post/002/pair_cam_7_cam_6_002_post.npz",
+              "num_points": 566,
+              "num_valid_points": 566,
+              "num_faces": 1035,
+              "num_valid_faces": 1035,
+              "outlier_filter": {
+                "enabled": true,
+                "initial_valid": 566,
+                "removed": 0,
+                "final_valid": 566,
+                "removed_ratio": 0.0
+              },
+              "mean_corr_comb": 0.8194693786143851,
+              "median_displacement_arbm_norm": 0.13810562131945486,
+              "median_Eeq": 0.004857642173880753
+            },
+            {
+              "pair_index": 3,
+              "camera_pair": [
+                "cam_6",
+                "cam_5"
+              ],
+              "output_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/pairs/002/pair_cam_6_cam_5_002.npz",
+              "output_ply": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/pairs/002/pair_cam_6_cam_5_002.ply",
+              "post_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/post/002/pair_cam_6_cam_5_002_post.npz",
+              "num_points": 533,
+              "num_valid_points": 533,
+              "num_faces": 971,
+              "num_valid_faces": 971,
+              "outlier_filter": {
+                "enabled": true,
+                "initial_valid": 533,
+                "removed": 0,
+                "final_valid": 533,
+                "removed_ratio": 0.0
+              },
+              "mean_corr_comb": 0.8186249192215316,
+              "median_displacement_arbm_norm": 0.12119394164918393,
+              "median_Eeq": 0.0050058495866534365
+            },
+            {
+              "pair_index": 4,
+              "camera_pair": [
+                "cam_5",
+                "cam_4"
+              ],
+              "output_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/pairs/002/pair_cam_5_cam_4_002.npz",
+              "output_ply": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/pairs/002/pair_cam_5_cam_4_002.ply",
+              "post_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/post/002/pair_cam_5_cam_4_002_post.npz",
+              "num_points": 592,
+              "num_valid_points": 592,
+              "num_faces": 1060,
+              "num_valid_faces": 1060,
+              "outlier_filter": {
+                "enabled": true,
+                "initial_valid": 592,
+                "removed": 0,
+                "final_valid": 592,
+                "removed_ratio": 0.0
+              },
+              "mean_corr_comb": 0.820385054340677,
+              "median_displacement_arbm_norm": 0.12853880979866994,
+              "median_Eeq": 0.004923948779847716
+            },
+            {
+              "pair_index": 5,
+              "camera_pair": [
+                "cam_4",
+                "cam_3"
+              ],
+              "output_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/pairs/002/pair_cam_4_cam_3_002.npz",
+              "output_ply": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/pairs/002/pair_cam_4_cam_3_002.ply",
+              "post_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/post/002/pair_cam_4_cam_3_002_post.npz",
+              "num_points": 599,
+              "num_valid_points": 599,
+              "num_faces": 1076,
+              "num_valid_faces": 1076,
+              "outlier_filter": {
+                "enabled": true,
+                "initial_valid": 599,
+                "removed": 0,
+                "final_valid": 599,
+                "removed_ratio": 0.0
+              },
+              "mean_corr_comb": 0.8227661568186666,
+              "median_displacement_arbm_norm": 0.12354861427788612,
+              "median_Eeq": 0.004778705329513092
+            },
+            {
+              "pair_index": 6,
+              "camera_pair": [
+                "cam_3",
+                "cam_2"
+              ],
+              "output_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/pairs/002/pair_cam_3_cam_2_002.npz",
+              "output_ply": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/pairs/002/pair_cam_3_cam_2_002.ply",
+              "post_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/post/002/pair_cam_3_cam_2_002_post.npz",
+              "num_points": 566,
+              "num_valid_points": 566,
+              "num_faces": 1023,
+              "num_valid_faces": 1023,
+              "outlier_filter": {
+                "enabled": true,
+                "initial_valid": 566,
+                "removed": 0,
+                "final_valid": 566,
+                "removed_ratio": 0.0
+              },
+              "mean_corr_comb": 0.8203698708720895,
+              "median_displacement_arbm_norm": 0.1365753895729236,
+              "median_Eeq": 0.004928429087323173
+            },
+            {
+              "pair_index": 7,
+              "camera_pair": [
+                "cam_2",
+                "cam_1"
+              ],
+              "output_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/pairs/002/pair_cam_2_cam_1_002.npz",
+              "output_ply": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/pairs/002/pair_cam_2_cam_1_002.ply",
+              "post_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/post/002/pair_cam_2_cam_1_002_post.npz",
+              "num_points": 567,
+              "num_valid_points": 567,
+              "num_faces": 1033,
+              "num_valid_faces": 1033,
+              "outlier_filter": {
+                "enabled": true,
+                "initial_valid": 567,
+                "removed": 0,
+                "final_valid": 567,
+                "removed_ratio": 0.0
+              },
+              "mean_corr_comb": 0.8203018392533379,
+              "median_displacement_arbm_norm": 0.12027202663037763,
+              "median_Eeq": 0.004805211082407649
+            },
+            {
+              "pair_index": 8,
+              "camera_pair": [
+                "cam_1",
+                "cam_0"
+              ],
+              "output_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/pairs/002/pair_cam_1_cam_0_002.npz",
+              "output_ply": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/pairs/002/pair_cam_1_cam_0_002.ply",
+              "post_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/post/002/pair_cam_1_cam_0_002_post.npz",
+              "num_points": 553,
+              "num_valid_points": 553,
+              "num_faces": 1007,
+              "num_valid_faces": 1007,
+              "outlier_filter": {
+                "enabled": true,
+                "initial_valid": 553,
+                "removed": 0,
+                "final_valid": 553,
+                "removed_ratio": 0.0
+              },
+              "mean_corr_comb": 0.8207407995347162,
+              "median_displacement_arbm_norm": 0.13359356665912628,
+              "median_Eeq": 0.0048601678127152634
+            },
+            {
+              "pair_index": 9,
+              "camera_pair": [
+                "cam_0",
+                "cam_11"
+              ],
+              "output_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/pairs/002/pair_cam_0_cam_11_002.npz",
+              "output_ply": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/pairs/002/pair_cam_0_cam_11_002.ply",
+              "post_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/post/002/pair_cam_0_cam_11_002_post.npz",
+              "num_points": 519,
+              "num_valid_points": 519,
+              "num_faces": 933,
+              "num_valid_faces": 933,
+              "outlier_filter": {
+                "enabled": true,
+                "initial_valid": 519,
+                "removed": 0,
+                "final_valid": 519,
+                "removed_ratio": 0.0
+              },
+              "mean_corr_comb": 0.8184328066173799,
+              "median_displacement_arbm_norm": 0.12891888305310137,
+              "median_Eeq": 0.004832802393402538
+            },
+            {
+              "pair_index": 10,
+              "camera_pair": [
+                "cam_11",
+                "cam_10"
+              ],
+              "output_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/pairs/002/pair_cam_11_cam_10_002.npz",
+              "output_ply": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/pairs/002/pair_cam_11_cam_10_002.ply",
+              "post_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/post/002/pair_cam_11_cam_10_002_post.npz",
+              "num_points": 545,
+              "num_valid_points": 545,
+              "num_faces": 987,
+              "num_valid_faces": 987,
+              "outlier_filter": {
+                "enabled": true,
+                "initial_valid": 545,
+                "removed": 0,
+                "final_valid": 545,
+                "removed_ratio": 0.0
+              },
+              "mean_corr_comb": 0.8218124759654223,
+              "median_displacement_arbm_norm": 0.1293835175410494,
+              "median_Eeq": 0.004703929817684019
+            },
+            {
+              "pair_index": 11,
+              "camera_pair": [
+                "cam_10",
+                "cam_9"
+              ],
+              "output_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/pairs/002/pair_cam_10_cam_9_002.npz",
+              "output_ply": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/pairs/002/pair_cam_10_cam_9_002.ply",
+              "post_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/recon3d/post/002/pair_cam_10_cam_9_002_post.npz",
+              "num_points": 568,
+              "num_valid_points": 568,
+              "num_faces": 1011,
+              "num_valid_faces": 1011,
+              "outlier_filter": {
+                "enabled": true,
+                "initial_valid": 568,
+                "removed": 0,
+                "final_valid": 568,
+                "removed_ratio": 0.0
+              },
+              "mean_corr_comb": 0.8223218030792087,
+              "median_displacement_arbm_norm": 0.1289098765156359,
+              "median_Eeq": 0.0048445444599298105
+            }
+          ]
+        }
+      ],
+      "errors": [],
+      "warnings": []
+    },
+    "visualize3d": {
+      "ok": true,
+      "project": "CylinderDIC",
+      "frame": "002",
+      "figures_dir": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/figures",
+      "outputs": {
+        "initial_shape_points": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/figures/002_initial_shape_points.png",
+        "initial_shape_surface": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/figures/002_initial_shape_surface.png",
+        "surface_fields": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/figures/002_surface_fields.png",
+        "displacement_components": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/figures/002_displacement_components.png",
+        "surface_cloud_morphology": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/figures/surface_clouds/002_surface_cloud_morphology.png",
+        "surface_cloud_displacement_total": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/figures/surface_clouds/002_surface_cloud_displacement_total.png",
+        "surface_cloud_displacement_ux": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/figures/surface_clouds/002_surface_cloud_displacement_ux.png",
+        "surface_cloud_displacement_uy": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/figures/surface_clouds/002_surface_cloud_displacement_uy.png",
+        "surface_cloud_displacement_uz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/figures/surface_clouds/002_surface_cloud_displacement_uz.png",
+        "reference_points_ply": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/figures/002_reference_points.ply",
+        "surface_fields_npz": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/figures/002_surface_fields.npz"
+      },
+      "errors": [],
+      "warnings": [],
+      "stats": {
+        "num_points_total": 3606,
+        "num_points_valid": 3548,
+        "num_pair_surfaces": 12,
+        "num_surface_samples": 6405,
+        "num_surface_cloud_faces": 12209,
+        "displacement_norm": {
+          "count": 3548,
+          "min": 0.43946863562023797,
+          "median": 0.4986629583621337,
+          "mean": 0.4989963695608484,
+          "max": 0.5824671137653066
+        }
+      },
+      "report_json": "/mnt/c/01project/Multi-DIC/case/CylinderDIC/results/figures/002_visualize3d_report.json"
     }
   }
 }

@@ -89,25 +89,37 @@ dic2d:
     enabled: false
 
 colmap:
-  backend: pycolmap
+  backend: native_colmap
+  executable: colmap
+  allow_external_executable: false
   workspace: colmap
   reference_camera: cam_0
   camera_model: SIMPLE_RADIAL
-  matcher: exhaustive
+  matcher: ring
+  matching_window: 2
+  wrap_matching: true
   use_gpu: false
   overwrite: true
   max_features: 8192
   first_octave: -1
   cross_check: false
   min_num_matches: 8
-  multiple_models: true
-  min_model_size: 3
+  multiple_models: false
+  min_model_size: 12
+  init_min_num_inliers: 50
+  init_max_error: 4.0
+  abs_pose_min_num_inliers: 15
+  abs_pose_min_inlier_ratio: 0.05
+  abs_pose_max_error: 12.0
+  filter_max_reproj_error: 4.0
+  abs_pose_refine_focal_length: true
+  abs_pose_refine_extra_params: true
   ba_global_max_refinements: 5
   max_reproj_error: 4.0
   dpi: 180
   min_focal_length_ratio: 0.1
   max_focal_length_ratio: 10.0
-  random_seed: 0
+  random_seed: 1
   num_threads: 1
 
 recon3d:

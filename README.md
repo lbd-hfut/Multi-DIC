@@ -3,7 +3,8 @@
 PyMultiDIC is a Python-first multi-view digital image correlation workflow. It
 wraps the full solving process as public Python API calls under
 `pymultidic.<function_name>` while keeping native C++ acceleration for the
-expensive Ncorr-style 2D DIC and 3D reconstruction stages.
+expensive Ncorr-style 2D DIC, CPU-only COLMAP SfM, and 3D reconstruction
+stages.
 
 The project can be used in two ways:
 
@@ -12,7 +13,7 @@ The project can be used in two ways:
   `native/`, then run the same API from source.
 
 The full user manual is available here:
-[docs/pymultidic_usage_en.pdf](docs/pymultidic_usage_en.pdf).
+[docs/pymultidic_usage_en.md](docs/pymultidic_usage_en.md).
 
 ## Example Results
 
@@ -36,12 +37,16 @@ small set of representative result files is stored under
 
 Additional copied outputs:
 
+- [docs/results/cylinderdic/sparse_scene.png](docs/results/cylinderdic/sparse_scene.png)
+- [docs/results/cylinderdic/camera_observations_3d.png](docs/results/cylinderdic/camera_observations_3d.png)
 - [docs/results/cylinderdic/recon3d_002.ply](docs/results/cylinderdic/recon3d_002.ply)
 - [docs/results/cylinderdic/recon3d_report.json](docs/results/cylinderdic/recon3d_report.json)
 - [docs/results/cylinderdic/pipeline_report.json](docs/results/cylinderdic/pipeline_report.json)
 
-For this example, the 3D reconstruction report records 3,695 valid 3D points
-after 3D outlier cleaning and uses the `native_recon3d` backend.
+The example is regenerated from `run.py` using the native COLMAP ring matcher
+and the `native_recon3d` backend. The current regenerated report registers all
+12 cameras in one SfM model, exports 3606 sparse points, and reconstructs 3548
+valid 3D displacement tracks for frame `002.bmp`.
 
 ## Install From PyPI
 
@@ -78,30 +83,36 @@ report = pymultidic.run_pipeline(
 )
 ```
 
-If an `MDICConfig` object is supplied, it has priority and later keyword
-arguments are ignored:
+If an `MDICConfig` object is supplied, it is used as the base configuration.
+Explicit keyword arguments still override matching fields for that call:
 
 ```python
 config = pymultidic.load_config("configs/MDIC.yaml")
-pymultidic.run_dic2d(config, subset_radius=99)  # uses the config value
+pymultidic.run_sfm(config, colmap_workspace="colmap_native")
 ```
 
 ## Local Native C++ Build
 
 Use this route when developing the repository, changing files under `native/`,
-or validating native builds before publishing wheels. The top-level
-[native/CMakeLists.txt](native/CMakeLists.txt) builds the native components in
-one configure/build pass:
+or validating native builds before publishing wheels. The only supported local
+source build path is the top-level [native/CMakeLists.txt](native/CMakeLists.txt)
+entry point:
 
 - `native_ncorr` / `libnative_ncorr.a`
 - `ncorr_cli`
 - `native_recon3d` pybind11 extension
+- `native_colmap` pybind11 extension
 
 WSL / Linux example:
 
 ```bash
 sudo apt-get update
-sudo apt-get install -y build-essential cmake ninja-build python3-dev python3-pip
+sudo apt-get install -y \
+  build-essential cmake ninja-build python3-dev python3-pip \
+  libboost-all-dev libeigen3-dev libceres-dev libflann-dev \
+  libopenimageio-dev openimageio-tools libopencv-dev \
+  libsqlite3-dev libgflags-dev libgoogle-glog-dev \
+  libmetis-dev libsuitesparse-dev libglew-dev qtbase5-dev
 python3 -m pip install -U pybind11 scikit-build-core
 
 cmake -S native -B build/wsl-native -G Ninja \
@@ -117,6 +128,7 @@ Expected WSL/Linux outputs:
 build/wsl-native/ncorr/libnative_ncorr.a
 build/wsl-native/ncorr/ncorr_cli
 build/wsl-native/recon3d/native_recon3d*.so
+build/wsl-native/colmap/native_colmap*.so
 ```
 
 Windows example from a Developer PowerShell with CMake and Ninja available:
@@ -132,14 +144,43 @@ Expected Windows outputs include:
 ```text
 build/windows-native/ncorr/ncorr_cli.exe
 build/windows-native/recon3d/native_recon3d*.pyd
+build/windows-native/colmap/native_colmap*.pyd
 ```
 
-After the native build, install the Python package locally:
+After the native build, run the full example from the repository root:
 
 ```bash
-python -m pip install -e .
 python run.py --config configs/MDIC.yaml
 ```
+
+`run.py` automatically prefers extensions from `build/wsl-native/colmap` and
+`build/wsl-native/recon3d`, so stale editable installs do not shadow the current
+checkout.
+
+The default SfM backend is `native_colmap`. It embeds the required CPU-only
+COLMAP code into a `native_colmap` pybind11 extension, so users do not need the
+`pycolmap` Python API or a separately downloaded `colmap` executable. The
+default matcher is `ring`, which imports a camera-order-aware pair list for the
+multi-camera CylinderDIC layout instead of using exhaustive all-pairs matching.
+This avoids unstable far-view matches on repeated speckle texture while still
+using COLMAP SIFT extraction, geometric verification, and incremental mapping.
+
+The embedded build uses the bundled COLMAP source tree in
+`native/colmap/upstream` by default. To test a different upstream checkout, pass
+`-DMDIC_COLMAP_SOURCE_DIR=/path/to/colmap`. If the extension is built without an
+available source tree, the old external command runner is kept only as a
+development fallback. Enable it explicitly with
+`colmap.allow_external_executable: true`; otherwise `native_colmap` raises a
+clear backend-unavailable error instead of silently requiring users to install
+COLMAP. The previous `pycolmap` backend remains available as an optional
+fallback with `pip install .[pycolmap]` and `colmap.backend: pycolmap`.
+Model registration summaries and native backend capabilities are included in
+`sfm_report.json`.
+
+The maintained boundary is the narrow `native_colmap` API plus stable Multi-DIC
+output files. Project-specific logic belongs in `native/colmap`; the upstream
+COLMAP tree should stay structurally intact and be linked through
+`native/colmap/upstream` or an explicit `MDIC_COLMAP_SOURCE_DIR`.
 
 ## Public API
 
@@ -158,7 +199,7 @@ Core API functions:
 - `pymultidic.run_step(config_or_step=None, step=None, **kwargs)`
 - `pymultidic.run_pipeline(config=None, steps=None, stop_on_error=True, **kwargs)`
 
-See [docs/pymultidic_usage_en.pdf](docs/pymultidic_usage_en.pdf) for the full
+See [docs/pymultidic_usage_en.md](docs/pymultidic_usage_en.md) for the full
 function-by-function parameter reference, return values, and examples.
 
 ## Workflow

@@ -227,3 +227,31 @@ case/**/ground_truth/
 
 # Native build outputs
 native/**/build*/
+
+# CMake / Ninja generated files when users build in custom folders
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+compile_commands.json
+build.ninja
+.ninja_deps
+.ninja_log
+install_manifest.txt
+Testing/
+
+# Native compiler and linker outputs
+*.o
+*.obj
+*.a
+*.lib
+*.dll
+*.dylib
+*.pyd
+*.exp
+*.ilk
+*.pdb
+
+# scikit-build temporary build trees
+_skbuild/
+*.dist-info/
+pip-wheel-metadata/

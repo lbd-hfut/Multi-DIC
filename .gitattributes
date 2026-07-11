@@ -1,0 +1,9 @@
+*.pdf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.bmp binary
+*.npz binary
+*.npy binary
+*.mat binary
+*.ply binary

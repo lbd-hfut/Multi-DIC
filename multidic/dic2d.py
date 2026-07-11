@@ -116,10 +116,16 @@ def _native_cli_path(config: MDICConfig) -> Path | None:
     candidates.extend(
         [
             config.workspace_root / "build" / "wsl-native" / "ncorr" / "ncorr_cli",
+            config.workspace_root / "build" / "wsl-fulltest" / "ncorr" / "ncorr_cli",
             config.workspace_root / "native" / "ncorr" / "build" / "ncorr_cli",
             config.workspace_root / "native" / "ncorr" / "build" / exe_name,
         ]
     )
+    build_root = config.workspace_root / "build"
+    if build_root.exists():
+        candidates.extend(sorted(build_root.glob(f"*/ncorr/{exe_name}")))
+        if os.name != "nt":
+            candidates.extend(sorted(build_root.glob("*/ncorr/ncorr_cli")))
     for candidate in candidates:
         if candidate.exists():
             return candidate

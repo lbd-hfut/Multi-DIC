@@ -7,12 +7,25 @@ dependencies:
   - cmake
   - ninja
   - pybind11
+  - cxx-compiler
+  - boost-cpp
+  - eigen
+  - ceres-solver
+  - flann
+  - openimageio
   - opencv
   - matplotlib
   - pyyaml
   - numpy
   - scipy
+  - sqlite
+  - gflags
+  - glog
+  - metis
+  - suitesparse
+  - glew
+  - qt-main
   - setuptools
   - wheel
   - pip:
-      - pycolmap==4.1.0
+      - scikit-build-core>=0.10

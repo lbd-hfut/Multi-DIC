@@ -3,6 +3,8 @@ name: Build wheels
 on:
   workflow_dispatch:
   push:
+    branches:
+      - main
     tags:
       - "v*"
   pull_request:
@@ -43,7 +45,7 @@ jobs:
           CIBW_ARCHS: "${{ matrix.cibw_archs }}"
           CIBW_SKIP: "*-musllinux_* *-win32"
           CIBW_MANYLINUX_X86_64_IMAGE: "manylinux_2_28"
-          CIBW_TEST_COMMAND: "python -c \"import pymultidic, native_recon3d; print(pymultidic.__version__); print(native_recon3d.__doc__)\""
+          CIBW_TEST_COMMAND: "python -c \"import pymultidic, native_colmap, native_recon3d; print(pymultidic.__version__); print(native_colmap.capabilities()); print(native_recon3d.__doc__)\""
 
       - uses: actions/upload-artifact@v4
         with:

@@ -2,14 +2,46 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
-import pymultidic
-
 
 DEFAULT_CONFIG = Path("configs/MDIC.yaml")
-DEFAULT_STEPS = ("validate", "sfm", "scale", "mask", "dic2d", "recon3d")
+DEFAULT_STEPS = ("validate", "sfm", "scale", "mask", "dic2d", "recon3d", "visualize3d")
+
+
+def _prefer_local_native_build() -> None:
+    """Prefer native extensions built from this checkout over stale editable installs."""
+
+    root = Path(__file__).resolve().parent
+    build_root = root / "build"
+    candidates = [
+        build_root / "wsl-native" / "colmap",
+        build_root / "wsl-native" / "recon3d",
+        build_root / "windows-native" / "colmap",
+        build_root / "windows-native" / "recon3d",
+    ]
+    if build_root.exists():
+        candidates.extend(sorted(build_root.glob("*/colmap")))
+        candidates.extend(sorted(build_root.glob("*/recon3d")))
+    for candidate in reversed(candidates):
+        if candidate.exists():
+            value = str(candidate)
+            if value not in sys.path:
+                sys.path.insert(0, value)
+    sys.meta_path = [
+        finder
+        for finder in sys.meta_path
+        if "_editable_skbc_pymultidic" not in type(finder).__module__
+        and "_editable_skbc_pymultidic" not in repr(finder)
+    ]
+
+
+_prefer_local_native_build()
+
+import pymultidic
+
 STEP_RUNNERS = {
     "validate": pymultidic.run_validate,
     "sfm": pymultidic.run_sfm,

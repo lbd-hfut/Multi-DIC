@@ -94,25 +94,37 @@ _DEFAULT_RAW: dict[str, Any] = {
         "strain": {"enabled": False},
     },
     "colmap": {
-        "backend": "pycolmap",
+        "backend": "native_colmap",
+        "executable": "colmap",
+        "allow_external_executable": False,
         "workspace": "colmap",
         "reference_camera": "cam_0",
         "camera_model": "SIMPLE_RADIAL",
-        "matcher": "exhaustive",
+        "matcher": "ring",
+        "matching_window": 2,
+        "wrap_matching": True,
         "use_gpu": False,
         "overwrite": True,
         "max_features": 8192,
         "first_octave": -1,
         "cross_check": False,
         "min_num_matches": 8,
-        "multiple_models": True,
-        "min_model_size": 3,
+        "multiple_models": False,
+        "min_model_size": 12,
+        "init_min_num_inliers": 50,
+        "init_max_error": 4.0,
+        "abs_pose_min_num_inliers": 15,
+        "abs_pose_min_inlier_ratio": 0.05,
+        "abs_pose_max_error": 12.0,
+        "filter_max_reproj_error": 4.0,
+        "abs_pose_refine_focal_length": True,
+        "abs_pose_refine_extra_params": True,
         "ba_global_max_refinements": 5,
         "max_reproj_error": 4.0,
         "dpi": 180,
         "min_focal_length_ratio": 0.1,
         "max_focal_length_ratio": 10.0,
-        "random_seed": 0,
+        "random_seed": 1,
         "num_threads": 1,
     },
     "recon3d": {
@@ -203,12 +215,30 @@ _FLAT_OVERRIDE_PATHS: dict[str, tuple[str, ...]] = {
     "cutoff_corrcoef": ("dic2d", "format", "cutoff_corrcoef"),
     "lenscoef": ("dic2d", "format", "lenscoef"),
     "colmap_backend": ("colmap", "backend"),
+    "colmap_executable": ("colmap", "executable"),
     "colmap_workspace": ("colmap", "workspace"),
     "reference_camera": ("colmap", "reference_camera"),
     "camera_model": ("colmap", "camera_model"),
     "matcher": ("colmap", "matcher"),
+    "matching_window": ("colmap", "matching_window"),
+    "wrap_matching": ("colmap", "wrap_matching"),
     "use_gpu": ("colmap", "use_gpu"),
     "max_features": ("colmap", "max_features"),
+    "first_octave": ("colmap", "first_octave"),
+    "cross_check": ("colmap", "cross_check"),
+    "min_num_matches": ("colmap", "min_num_matches"),
+    "multiple_models": ("colmap", "multiple_models"),
+    "min_model_size": ("colmap", "min_model_size"),
+    "init_min_num_inliers": ("colmap", "init_min_num_inliers"),
+    "init_max_error": ("colmap", "init_max_error"),
+    "abs_pose_min_num_inliers": ("colmap", "abs_pose_min_num_inliers"),
+    "abs_pose_min_inlier_ratio": ("colmap", "abs_pose_min_inlier_ratio"),
+    "abs_pose_max_error": ("colmap", "abs_pose_max_error"),
+    "filter_max_reproj_error": ("colmap", "filter_max_reproj_error"),
+    "abs_pose_refine_focal_length": ("colmap", "abs_pose_refine_focal_length"),
+    "abs_pose_refine_extra_params": ("colmap", "abs_pose_refine_extra_params"),
+    "ba_global_max_refinements": ("colmap", "ba_global_max_refinements"),
+    "colmap_random_seed": ("colmap", "random_seed"),
     "recon_backend": ("recon3d", "backend"),
     "min_views": ("recon3d", "min_views"),
     "min_corrcoef": ("recon3d", "min_corrcoef"),
@@ -235,7 +265,7 @@ def build_config(
     *,
     case_root: str | Path | None = None,
     project_name: str = "PyMultiDIC",
-    output_root: str | Path = "results",
+    output_root: str | Path | None = None,
     speckle_dir: str | Path = "images",
     calibration_dir: str | Path = "calibrate_images",
     camera_glob: str = "cam_*",
@@ -248,13 +278,21 @@ def build_config(
 ) -> MDICConfig:
     """Return an MDICConfig from either a config object or direct API inputs.
 
-    If ``config`` is provided, all direct inputs are ignored. If ``config`` is
-    ``None``, ``case_root`` is required and the remaining inputs override the
-    default workflow parameters.
+    If ``config`` is provided, its raw settings are used as the base and
+    explicit overrides are applied. If ``config`` is ``None``, ``case_root`` is
+    required and the remaining inputs override the default workflow parameters.
     """
 
     if config is not None:
-        return config
+        if output_root is not None:
+            overrides.setdefault("project", {})["output_root"] = str(output_root)
+        if not raw_overrides and not overrides:
+            return config
+        raw = deepcopy(config.raw)
+        if raw_overrides:
+            _deep_update(raw, raw_overrides)
+        _apply_keyword_overrides(raw, overrides)
+        return _config_from_raw(raw, config.workspace_root)
     if case_root is None:
         raise ValueError("case_root is required when config is None.")
 
@@ -264,7 +302,7 @@ def build_config(
         {
             "name": project_name,
             "case_root": str(case_root),
-            "output_root": str(output_root),
+            "output_root": str(output_root or "results"),
         }
     )
     raw["data"].update(

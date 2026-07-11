@@ -8,3 +8,4 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_subdirectory(ncorr)
 add_subdirectory(recon3d)
+add_subdirectory(colmap)
