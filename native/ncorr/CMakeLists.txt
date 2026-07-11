@@ -14,7 +14,7 @@ else()
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64)$")
-  target_compile_options(native_ncorr PRIVATE -march=x86-64 -mtune=generic)
+  target_compile_options(native_ncorr PRIVATE -march=x86-64 -mtune=generic -Wa,-mx86-used-note=no)
 endif()
 
 add_executable(ncorr_cli
@@ -23,7 +23,7 @@ add_executable(ncorr_cli
 target_link_libraries(ncorr_cli PRIVATE native_ncorr)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64)$")
-  target_compile_options(ncorr_cli PRIVATE -march=x86-64 -mtune=generic)
+  target_compile_options(ncorr_cli PRIVATE -march=x86-64 -mtune=generic -Wa,-mx86-used-note=no)
 endif()
 
 install(TARGETS ncorr_cli
