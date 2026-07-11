@@ -76,4 +76,4 @@ sdist.exclude = [
 ]
 
 [tool.scikit-build.cmake.define]
-PYBIND11_FINDPYTHON = "ON"
+PYBIND11_FINDPYTHON = "OFF"
