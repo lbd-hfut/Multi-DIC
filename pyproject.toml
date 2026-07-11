@@ -1,6 +1,6 @@
 [build-system]
 requires = [
-  "cmake>=3.20,<4",
+  "cmake>=3.20,<3.30",
   "scikit-build-core>=0.10",
   "pybind11>=2.11",
 ]
@@ -41,7 +41,7 @@ pycolmap = [
 ]
 
 build = [
-  "cmake>=3.20,<4",
+  "cmake>=3.20,<3.30",
   "cibuildwheel>=2.20",
   "ninja>=1.11",
   "pybind11>=2.11",
