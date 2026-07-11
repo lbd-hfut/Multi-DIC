@@ -86,7 +86,7 @@ jobs:
           CIBW_ARCHS: "${{ matrix.cibw_archs }}"
           CIBW_SKIP: "*-musllinux_* *-win32"
           CIBW_MANYLINUX_X86_64_IMAGE: "manylinux_2_28"
-          CIBW_BEFORE_ALL_LINUX: "dnf install -y dnf-plugins-core epel-release || true; dnf config-manager --set-enabled crb || true; dnf install -y boost-devel ceres-solver-devel eigen3-devel flann-devel freeimage-devel glew-devel glog-devel metis-devel OpenImageIO-devel OpenImageIO-utils sqlite-devel suitesparse-devel; touch /usr/bin/iv; chmod +x /usr/bin/iv"
+          CIBW_BEFORE_ALL_LINUX: "dnf install -y dnf-plugins-core epel-release || true; dnf config-manager --set-enabled crb || true; dnf install -y boost-devel ceres-solver-devel eigen3-devel flann-devel freeimage-devel glew-devel glog-devel lapack-devel metis-devel openblas-devel OpenImageIO-devel OpenImageIO-utils sqlite-devel suitesparse-devel; touch /usr/bin/iv; chmod +x /usr/bin/iv"
           CIBW_ENVIRONMENT_WINDOWS: "CMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake VCPKG_TARGET_TRIPLET=x64-windows"
           CIBW_ENVIRONMENT_MACOS: "OpenMP_ROOT=/opt/homebrew/opt/libomp CMAKE_PREFIX_PATH='/opt/homebrew/opt/libomp;/opt/homebrew' CPPFLAGS='-I/opt/homebrew/opt/libomp/include' LDFLAGS='-L/opt/homebrew/opt/libomp/lib'"
           CIBW_TEST_COMMAND: "python -c \"import pymultidic, native_colmap, native_recon3d; print(pymultidic.__version__); print(native_colmap.capabilities()); print(native_recon3d.__doc__)\""
