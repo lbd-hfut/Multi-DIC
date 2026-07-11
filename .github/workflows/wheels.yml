@@ -38,13 +38,57 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install macOS COLMAP deps
+        if: runner.os == 'macOS'
+        run: |
+          brew update
+          brew install \
+            boost \
+            ceres-solver \
+            eigen \
+            flann \
+            glew \
+            glog \
+            libomp \
+            metis \
+            openimageio \
+            sqlite \
+            suite-sparse
+          echo "OpenMP_ROOT=$(brew --prefix libomp)" >> "$GITHUB_ENV"
+          echo "CMAKE_PREFIX_PATH=$(brew --prefix libomp);$(brew --prefix)" >> "$GITHUB_ENV"
+          echo "CPPFLAGS=-I$(brew --prefix libomp)/include" >> "$GITHUB_ENV"
+          echo "LDFLAGS=-L$(brew --prefix libomp)/lib" >> "$GITHUB_ENV"
+
+      - name: Install Windows COLMAP deps
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          vcpkg install `
+            boost-graph:x64-windows `
+            boost-program-options:x64-windows `
+            ceres:x64-windows `
+            eigen3:x64-windows `
+            flann:x64-windows `
+            freeimage:x64-windows `
+            glew:x64-windows `
+            glog:x64-windows `
+            metis:x64-windows `
+            openimageio:x64-windows `
+            sqlite3:x64-windows `
+            suitesparse:x64-windows
+          "CMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "VCPKG_TARGET_TRIPLET=x64-windows" | Out-File -FilePath $env:GITHUB_ENV -Append
+
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.23.3
         env:
-          CIBW_BUILD: "cp310-* cp311-* cp312-* cp313-*"
+          CIBW_BUILD: "cp312-*"
           CIBW_ARCHS: "${{ matrix.cibw_archs }}"
           CIBW_SKIP: "*-musllinux_* *-win32"
           CIBW_MANYLINUX_X86_64_IMAGE: "manylinux_2_28"
+          CIBW_BEFORE_ALL_LINUX: "dnf install -y dnf-plugins-core epel-release || true; dnf config-manager --set-enabled crb || true; dnf install -y boost-devel ceres-solver-devel eigen3-devel flann-devel freeimage-devel glew-devel glog-devel metis-devel OpenImageIO-devel sqlite-devel suitesparse-devel"
+          CIBW_ENVIRONMENT_WINDOWS: "CMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake VCPKG_TARGET_TRIPLET=x64-windows"
+          CIBW_ENVIRONMENT_MACOS: "OpenMP_ROOT=/opt/homebrew/opt/libomp CMAKE_PREFIX_PATH='/opt/homebrew/opt/libomp;/opt/homebrew' CPPFLAGS='-I/opt/homebrew/opt/libomp/include' LDFLAGS='-L/opt/homebrew/opt/libomp/lib'"
           CIBW_TEST_COMMAND: "python -c \"import pymultidic, native_colmap, native_recon3d; print(pymultidic.__version__); print(native_colmap.capabilities()); print(native_recon3d.__doc__)\""
 
       - uses: actions/upload-artifact@v4
