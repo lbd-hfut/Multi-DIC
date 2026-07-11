@@ -60,6 +60,7 @@ Issues = "https://github.com/lbd-hfut/Multi-DIC/issues"
 
 [tool.scikit-build]
 cmake.source-dir = "native"
+cmake.build-type = "Release"
 wheel.packages = ["multidic", "pymultidic"]
 sdist.include = [
   "configs/**",
