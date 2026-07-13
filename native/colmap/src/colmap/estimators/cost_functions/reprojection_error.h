@@ -37,6 +37,9 @@
 #include <ceres/ceres.h>
 #include <ceres/rotation.h>
 
+#include <type_traits>
+#include <utility>
+
 namespace colmap {
 
 // Rotates the point and computes the Jacobian of R(q) * p with respect to Eigen
@@ -366,6 +369,28 @@ class RigReprojErrorConstantRigCostFunctor
   const RigReprojErrorCostFunctor<CameraModel> reproj_cost_;
 };
 
+// Keep the analytical implementation behind a separately instantiated helper.
+// Recent MSVC versions instantiate discarded `if constexpr` branches in the
+// camera switch below deeply enough to compile AnalyticalReprojErrorCostFunction
+// for camera models without ImgFromCamWithJac. Selecting between two overloads
+// prevents the unsupported specialization from being instantiated.
+template <template <typename> class CostFunctor,
+          typename CameraModel,
+          typename... Args>
+ceres::CostFunction* CreateCameraCostFunctionForModel(std::false_type,
+                                                      Args&&... args) {
+  return CostFunctor<CameraModel>::Create(std::forward<Args>(args)...);
+}
+
+template <template <typename> class CostFunctor,
+          typename CameraModel,
+          typename... Args>
+ceres::CostFunction* CreateCameraCostFunctionForModel(std::true_type,
+                                                      Args&&... args) {
+  return new AnalyticalReprojErrorCostFunction<CameraModel>(
+      std::forward<Args>(args)...);
+}
+
 template <template <typename> class CostFunctor, typename... Args>
 ceres::CostFunction* CreateCameraCostFunction(
     const CameraModelId camera_model_id, Args&&... args) {
@@ -373,14 +398,12 @@ ceres::CostFunction* CreateCameraCostFunction(
   switch (camera_model_id) {
 #define CAMERA_MODEL_CASE(CameraModel)                                        \
   case CameraModel::model_id:                                                 \
-    if constexpr (std::is_same<CostFunctor<CameraModel>,                      \
-                               ReprojErrorCostFunctor<CameraModel>>::value && \
-                  CameraModel::has_img_from_cam_with_jac) {                   \
-      return new AnalyticalReprojErrorCostFunction<CameraModel>(              \
-          std::forward<Args>(args)...);                                       \
-    } else {                                                                  \
-      return CostFunctor<CameraModel>::Create(std::forward<Args>(args)...);   \
-    }                                                                         \
+    return CreateCameraCostFunctionForModel<CostFunctor, CameraModel>(         \
+        std::bool_constant<                                                   \
+            std::is_same<CostFunctor<CameraModel>,                            \
+                         ReprojErrorCostFunctor<CameraModel>>::value &&       \
+            CameraModel::has_img_from_cam_with_jac>{},                        \
+        std::forward<Args>(args)...);                                         \
     break;
 
     CAMERA_MODEL_SWITCH_CASES
