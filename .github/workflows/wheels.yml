@@ -90,6 +90,7 @@ jobs:
             libceres-dev \
             libeigen3-dev \
             libgoogle-glog-dev \
+            libmetis-dev \
             libsqlite3-dev \
             libsuitesparse-dev \
             ninja-build \

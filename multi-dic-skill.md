@@ -81,7 +81,7 @@ sudo apt-get update
 sudo apt-get install -y \
   build-essential cmake ninja-build python3-dev python3-pip python3-venv \
   libboost-graph-dev libeigen3-dev libceres-dev \
-  libsqlite3-dev libgoogle-glog-dev libsuitesparse-dev
+  libsqlite3-dev libgoogle-glog-dev libmetis-dev libsuitesparse-dev
 
 python3 -m venv .venv
 . .venv/bin/activate
