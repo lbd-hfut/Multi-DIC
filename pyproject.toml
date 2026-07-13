@@ -8,10 +8,10 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "pymultidic"
-version = "0.1.8"
+version = "2.0.0"
 description = "Config-driven calibration-free multi-view DIC workflow."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.12,<3.13"
 license = { file = "LICENSE" }
 authors = [
   { name = "LeeBDa", email = "liboda1101@gmail.com" },
@@ -20,10 +20,10 @@ classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Science/Research",
   "License :: OSI Approved :: MIT License",
-  "Operating System :: OS Independent",
+  "Operating System :: Microsoft :: Windows :: Windows 10",
+  "Operating System :: Microsoft :: Windows :: Windows 11",
+  "Operating System :: POSIX :: Linux",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Topic :: Scientific/Engineering :: Image Processing",
 ]

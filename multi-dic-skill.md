@@ -11,6 +11,9 @@ how to run and debug real experiment data when no ground truth is available.
 - Do not create separate experimental build branches or alternate native build
   layouts unless the user explicitly asks for that.
 - The Python package surface is `pymultidic`.
+- PyMultiDIC 2.x publishes CPython 3.12 wheels for Windows x86_64 and Linux
+  x86_64. Other Python versions and macOS require an explicitly supported
+  source-development setup.
 - The default SfM backend is `native_colmap`, a CPU-only embedded COLMAP
   adapter. It is the project's only SfM implementation.
 - If the user is using an installed PyPI wheel (`pip install pymultidic`) and
@@ -75,13 +78,13 @@ From the repository root:
 ```bash
 sudo apt-get update
 sudo apt-get install -y \
-  build-essential cmake ninja-build python3-dev python3-pip \
-  libboost-all-dev libeigen3-dev libceres-dev libflann-dev \
-  libopenimageio-dev openimageio-tools libopencv-dev \
-  libsqlite3-dev libgflags-dev libgoogle-glog-dev \
-  libmetis-dev libsuitesparse-dev libglew-dev qtbase5-dev
+  build-essential cmake ninja-build python3-dev python3-pip python3-venv \
+  libboost-graph-dev libeigen3-dev libceres-dev \
+  libsqlite3-dev libgoogle-glog-dev libsuitesparse-dev
 
-python3 -m pip install -U pybind11 scikit-build-core
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install -U pybind11 scikit-build-core
 ```
 
 Build from `native/` only:
@@ -89,8 +92,8 @@ Build from `native/` only:
 ```bash
 cmake -S native -B build/wsl-native -G Ninja \
   -DPYBIND11_FINDPYTHON=ON \
-  -DPython_EXECUTABLE=/usr/bin/python3 \
-  -Dpybind11_DIR=$(python3 -m pybind11 --cmakedir)
+  -DPython_EXECUTABLE=$(which python) \
+  -Dpybind11_DIR=$(python -m pybind11 --cmakedir)
 cmake --build build/wsl-native -j2
 ```
 

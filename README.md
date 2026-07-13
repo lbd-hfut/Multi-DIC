@@ -57,6 +57,10 @@ export, and reconstructs 12926 valid 3D displacement points for frame
 pip install pymultidic
 ```
 
+PyMultiDIC 2.x publishes native CPython 3.12 wheels for Windows x86_64 and
+Linux x86_64. Other Python versions and macOS do not currently have supported
+binary wheels.
+
 Then call the package from Python:
 
 ```python
@@ -111,17 +115,17 @@ WSL / Linux example:
 ```bash
 sudo apt-get update
 sudo apt-get install -y \
-  build-essential cmake ninja-build python3-dev python3-pip \
-  libboost-all-dev libeigen3-dev libceres-dev libflann-dev \
-  libopenimageio-dev openimageio-tools libopencv-dev \
-  libsqlite3-dev libgflags-dev libgoogle-glog-dev \
-  libmetis-dev libsuitesparse-dev libglew-dev qtbase5-dev
-python3 -m pip install -U pybind11 scikit-build-core
+  build-essential cmake ninja-build python3-dev python3-pip python3-venv \
+  libboost-graph-dev libeigen3-dev libceres-dev \
+  libsqlite3-dev libgoogle-glog-dev libsuitesparse-dev
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install -U pybind11 scikit-build-core
 
 cmake -S native -B build/wsl-native -G Ninja \
   -DPYBIND11_FINDPYTHON=ON \
-  -DPython_EXECUTABLE=/usr/bin/python3 \
-  -Dpybind11_DIR=$(python3 -m pybind11 --cmakedir)
+  -DPython_EXECUTABLE=$(which python) \
+  -Dpybind11_DIR=$(python -m pybind11 --cmakedir)
 cmake --build build/wsl-native
 ```
 

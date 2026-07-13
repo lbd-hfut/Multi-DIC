@@ -182,7 +182,8 @@ std::vector<std::pair<int, int>> CreateImagePairs(const std::size_t num_images,
       if (i == j) {
         continue;
       }
-      const auto pair = std::minmax(i, j);
+      const auto ordered = std::minmax(i, j);
+      const std::pair<int, int> pair{ordered.first, ordered.second};
       if (std::find(result.begin(), result.end(), pair) == result.end()) {
         result.push_back(pair);
       }

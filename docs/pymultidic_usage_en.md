@@ -58,6 +58,11 @@ For normal users, start with the package installation:
 python -m pip install -U pymultidic
 ```
 
+PyMultiDIC 2.x provides binary wheels for CPython 3.12 on Windows x86_64 and
+Linux x86_64. A supported wheel includes `native_colmap`, `native_recon3d`, and
+`ncorr_cli`; no local compiler is required. Other Python versions and macOS do
+not currently have supported binary wheels.
+
 Run a YAML-configured workflow:
 
 ```bash
@@ -209,7 +214,7 @@ Use this route only for development or when a wheel is not available.
 
 Prerequisites:
 
-- Python 3.10 or newer.
+- Python 3.12.
 - Visual Studio Build Tools or a Developer PowerShell with a C++ compiler.
 - CMake and Ninja.
 
@@ -253,13 +258,13 @@ Install dependencies on Ubuntu or Debian:
 ```bash
 sudo apt-get update
 sudo apt-get install -y \
-  build-essential cmake ninja-build python3-dev python3-pip \
-  libboost-all-dev libeigen3-dev libceres-dev libflann-dev \
-  libopenimageio-dev openimageio-tools libopencv-dev \
-  libsqlite3-dev libgflags-dev libgoogle-glog-dev \
-  libmetis-dev libsuitesparse-dev libglew-dev qtbase5-dev
+  build-essential cmake ninja-build python3-dev python3-pip python3-venv \
+  libboost-graph-dev libeigen3-dev libceres-dev \
+  libsqlite3-dev libgoogle-glog-dev libsuitesparse-dev
 
-python3 -m pip install -U pybind11 scikit-build-core
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install -U pybind11 scikit-build-core
 ```
 
 Build:
@@ -267,8 +272,8 @@ Build:
 ```bash
 cmake -S native -B build/wsl-native -G Ninja \
   -DPYBIND11_FINDPYTHON=ON \
-  -DPython_EXECUTABLE=/usr/bin/python3 \
-  -Dpybind11_DIR=$(python3 -m pybind11 --cmakedir)
+  -DPython_EXECUTABLE=$(which python) \
+  -Dpybind11_DIR=$(python -m pybind11 --cmakedir)
 cmake --build build/wsl-native -j2
 ```
 

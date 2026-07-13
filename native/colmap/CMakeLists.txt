@@ -1,6 +1,12 @@
-set(MDIC_COLMAP_DEPS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/.deps/Library" CACHE PATH
+if(WIN32)
+  set(_mdic_colmap_default_deps_dir
+      "${CMAKE_CURRENT_SOURCE_DIR}/.deps/Library")
+else()
+  set(_mdic_colmap_default_deps_dir "")
+endif()
+set(MDIC_COLMAP_DEPS_DIR "${_mdic_colmap_default_deps_dir}" CACHE PATH
     "Project-local CPU dependency prefix for the COLMAP sparse source port.")
-if(EXISTS "${MDIC_COLMAP_DEPS_DIR}")
+if(MDIC_COLMAP_DEPS_DIR AND EXISTS "${MDIC_COLMAP_DEPS_DIR}")
   list(PREPEND CMAKE_PREFIX_PATH
     "${MDIC_COLMAP_DEPS_DIR}"
     "${MDIC_COLMAP_DEPS_DIR}/lib/cmake"
@@ -12,12 +18,25 @@ find_package(Eigen3 CONFIG QUIET)
 find_package(Ceres CONFIG QUIET)
 find_package(glog CONFIG QUIET)
 find_package(Boost CONFIG QUIET COMPONENTS graph)
-find_package(SuiteSparse_config CONFIG QUIET)
-find_package(AMD CONFIG QUIET)
-find_package(COLAMD CONFIG QUIET)
-find_package(CAMD CONFIG QUIET)
-find_package(CCOLAMD CONFIG QUIET)
-find_package(CHOLMOD CONFIG QUIET)
+if(NOT TARGET SuiteSparse::SuiteSparseConfig AND
+   NOT TARGET SuiteSparse::SuiteSparseConfig_static)
+  find_package(SuiteSparse_config CONFIG QUIET)
+endif()
+if(NOT TARGET SuiteSparse::AMD AND NOT TARGET SuiteSparse::AMD_static)
+  find_package(AMD CONFIG QUIET)
+endif()
+if(NOT TARGET SuiteSparse::COLAMD AND NOT TARGET SuiteSparse::COLAMD_static)
+  find_package(COLAMD CONFIG QUIET)
+endif()
+if(NOT TARGET SuiteSparse::CAMD AND NOT TARGET SuiteSparse::CAMD_static)
+  find_package(CAMD CONFIG QUIET)
+endif()
+if(NOT TARGET SuiteSparse::CCOLAMD AND NOT TARGET SuiteSparse::CCOLAMD_static)
+  find_package(CCOLAMD CONFIG QUIET)
+endif()
+if(NOT TARGET SuiteSparse::CHOLMOD AND NOT TARGET SuiteSparse::CHOLMOD_static)
+  find_package(CHOLMOD CONFIG QUIET)
+endif()
 find_package(SQLite3 QUIET)
 foreach(_suite_component SuiteSparse_config AMD COLAMD CAMD CCOLAMD)
   if(EXISTS "${MDIC_COLMAP_DEPS_DIR}/lib/cmake/${_suite_component}/${_suite_component}Config.cmake")
@@ -51,6 +70,7 @@ if(EXISTS "${COLMAP_PORT_SRC_DIR}/thirdparty/PoseLib/CMakeLists.txt" AND NOT TAR
   set(WITH_BENCHMARK OFF CACHE BOOL "" FORCE)
   add_subdirectory("${COLMAP_PORT_SRC_DIR}/thirdparty/PoseLib"
                    "${CMAKE_CURRENT_BINARY_DIR}/poselib" EXCLUDE_FROM_ALL)
+  set_target_properties(PoseLib PROPERTIES POSITION_INDEPENDENT_CODE ON)
   if(TARGET PoseLib AND NOT TARGET PoseLib::PoseLib)
     add_library(PoseLib::PoseLib ALIAS PoseLib)
   endif()
@@ -170,15 +190,20 @@ if(MDIC_COLMAP_SPARSE_READY)
     "${COLMAP_PORT_SRC_DIR}/colmap/sfm/observation_manager.cc"
   )
   target_compile_features(mdic_colmap_sparse PUBLIC cxx_std_17)
+  set_target_properties(mdic_colmap_sparse PROPERTIES
+    POSITION_INDEPENDENT_CODE ON)
   target_include_directories(mdic_colmap_sparse PUBLIC
     "${COLMAP_PORT_SRC_DIR}"
     "${COLMAP_PORT_SRC_DIR}/thirdparty/PoseLib")
   target_compile_definitions(mdic_colmap_sparse PUBLIC
     GLOG_NO_ABBREVIATED_SEVERITIES
-    GLOG_VERSION_MAJOR=0
-    GLOG_VERSION_MINOR=7
     NOMINMAX
     WIN32_LEAN_AND_MEAN)
+  if(glog_VERSION MATCHES "^([0-9]+)\\.([0-9]+)")
+    target_compile_definitions(mdic_colmap_sparse PUBLIC
+      GLOG_VERSION_MAJOR=${CMAKE_MATCH_1}
+      GLOG_VERSION_MINOR=${CMAKE_MATCH_2})
+  endif()
   target_link_libraries(mdic_colmap_sparse PUBLIC
     Eigen3::Eigen
     Ceres::ceres
