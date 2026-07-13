@@ -8,7 +8,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "pymultidic"
-version = "0.1.4"
+version = "0.1.5"
 description = "Config-driven calibration-free multi-view DIC workflow."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -36,10 +36,6 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-pycolmap = [
-  "pycolmap==4.1.0",
-]
-
 build = [
   "cmake>=3.20,<3.30",
   "cibuildwheel>=2.20",
@@ -65,7 +61,13 @@ wheel.packages = ["multidic", "pymultidic"]
 sdist.include = [
   "configs/**",
   "docs/pymultidic_usage_en.md",
-  "native/**",
+  "native/CMakeLists.txt",
+  "native/ncorr/**",
+  "native/recon3d/**",
+  "native/colmap/CMakeLists.txt",
+  "native/colmap/README.md",
+  "native/colmap/LICENSE.COLMAP.txt",
+  "native/colmap/src/**",
   "run.py",
 ]
 sdist.exclude = [

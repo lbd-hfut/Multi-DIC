@@ -5,8 +5,8 @@ import shutil
 from pathlib import Path
 from typing import Any
 
-from .colmap_backends import BackendUnavailableError, create_colmap_backend
-from .colmap_backends.base import SfmPaths
+from .colmap_backends.base import BackendUnavailableError, SfmPaths
+from .colmap_backends.native_colmap_backend import NativeColmapBackend
 from .config import MDICConfig
 from .validate import validate_case
 
@@ -16,7 +16,7 @@ def run_sfm(config: MDICConfig) -> dict[str, Any]:
     report: dict[str, Any] = {
         "ok": False,
         "project": config.project.name,
-        "backend": str(_colmap_config(config).get("backend", "pycolmap")),
+        "backend": "native_colmap",
         "workspace": str(_sfm_workspace(config)),
         "database_path": str(_database_path(config)),
         "image_path": str(_colmap_image_dir(config)),
@@ -58,7 +58,7 @@ def run_sfm(config: MDICConfig) -> dict[str, Any]:
         sparse_root=_sfm_workspace(config) / "colmap_sfm",
     )
     try:
-        backend = create_colmap_backend(_colmap_config(config))
+        backend = NativeColmapBackend(_colmap_config(config))
         report["backend"] = backend.name
         report["reconstructions"] = backend.run(paths, image_names, report)
     except BackendUnavailableError as exc:

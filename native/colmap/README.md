@@ -1,30 +1,36 @@
-# Multi-DIC native COLMAP scope
+# Multi-DIC native COLMAP sparse SfM
 
-This module intentionally exposes only the CPU sparse SfM surface that Multi-DIC
-needs:
+This directory contains the only SfM implementation supported by Multi-DIC.
+It builds an embedded CPU-only `native_colmap` extension and never invokes an
+external executable or another Python SfM backend.
 
-- SIFT feature extraction for the selected reference images.
-- Exhaustive pair matching and two-view geometry verification.
-- Incremental sparse mapping with bundle adjustment.
-- Binary and text COLMAP model export for cameras, sparse points, and tracks.
+The runtime pipeline is:
 
-It intentionally excludes GPU/CUDA SIFT, GUI, dense/MVS reconstruction, meshing,
-vocabulary-tree retrieval, and COLMAP's Python API. Multi-DIC consumes the
-resulting COLMAP text model through its own stable exporter in
-`multidic.colmap_backends.native_colmap_backend`.
+```text
+reference images -> CPU SIFT and verified matches
+                 -> COLMAP CorrespondenceGraph and IncrementalMapper
+                 -> IncrementalTriangulator
+                 -> COLMAP local/global Ceres bundle adjustment
+                 -> COLMAP text model and Multi-DIC products
+```
 
-Build modes:
+`src/colmap/` is the trimmed COLMAP sparse source set actually linked into
+`mdic_colmap_sparse`. `src/thirdparty/PoseLib/` contains only the files needed
+by that build. Dense MVS, GPU, GUI, meshing, retrieval, command-line programs,
+and unrelated source trees are intentionally absent.
 
-- Embedded mode links the pybind11 module against `native/colmap/upstream` by
-  default. Override it with `-DMDIC_COLMAP_SOURCE_DIR=/path/to/colmap` when
-  testing another COLMAP source tree. This is the release target for wheels
-  because users should not have to install `colmap` separately.
-- The bundled upstream tree also carries the PoseLib and faiss sources used by
-  COLMAP's FetchContent configuration, so the default build does not need to
-  download them at configure time.
-- External fallback mode keeps the old command runner for development only. It
-  requires `allow_external_executable: true` in the Python options.
+The normal project build is sufficient:
 
-The COLMAP source tree under `upstream/` is treated as upstream code. Keep
-project-specific logic in this directory's adapter instead of editing COLMAP
-internals.
+```powershell
+python -m cmake -S native -B build/native-colmap-port -G Ninja
+cmake --build build/native-colmap-port --target native_colmap -j 2
+```
+
+The build fails during configuration when the project-local native COLMAP
+dependencies are incomplete; there is no alternate SfM implementation.
+
+The stable Python entry point is `native_colmap.run_cpu_sfm(...)`. It writes
+COLMAP text models plus the camera, sparse-point, observation, PLY, MAT, NPZ,
+JSON, and visualization products consumed by Multi-DIC.
+
+COLMAP's BSD license is reproduced in `LICENSE.COLMAP.txt`.

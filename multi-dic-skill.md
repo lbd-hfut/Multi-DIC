@@ -12,8 +12,7 @@ how to run and debug real experiment data when no ground truth is available.
   layouts unless the user explicitly asks for that.
 - The Python package surface is `pymultidic`.
 - The default SfM backend is `native_colmap`, a CPU-only embedded COLMAP
-  adapter. It should not require `pycolmap` or a separately downloaded COLMAP
-  executable for normal use.
+  adapter. It is the project's only SfM implementation.
 - If the user is using an installed PyPI wheel (`pip install pymultidic`) and
   is not changing native source code, do not set up a local C++ build
   environment. Validate the installed package and run the Python API directly.
@@ -23,6 +22,9 @@ how to run and debug real experiment data when no ground truth is available.
   - `build/wsl-native/colmap/native_colmap*.so`
   - or the equivalent `build/windows-native/...` `.exe` / `.pyd` files on
     Windows.
+  - on this Windows checkout, the validated COLMAP source-port build also
+    produces `build/native-colmap-port/colmap/native_colmap*.pyd` and
+    `build/native-colmap-port/colmap/mdic_colmap_sparse.lib`.
 
 ## Choose Install Mode First
 
@@ -118,6 +120,14 @@ cmake -S native -B build/windows-native -G Ninja -DPYBIND11_FINDPYTHON=ON
 cmake --build build/windows-native
 ```
 
+For the current local Windows COLMAP source-port validation tree, use the
+project-local Visual Studio Build Tools and explicit pybind11 path:
+
+```powershell
+cmd /c ""C:\01project\ncorr\.tools\vsbt\VC\Auxiliary\Build\vcvars64.bat" >nul && python -m cmake -S native -B build\native-colmap-port -G Ninja -DCMAKE_MAKE_PROGRAM=C:\Users\LBD\AppData\Roaming\Python\Python313\Scripts\ninja.exe -DCMAKE_BUILD_TYPE=Release -DPYBIND11_FINDPYTHON=OFF -Dpybind11_DIR=C:\Users\LBD\AppData\Roaming\Python\Python313\site-packages\pybind11\share\cmake\pybind11"
+cmd /c ""C:\01project\ncorr\.tools\vsbt\VC\Auxiliary\Build\vcvars64.bat" >nul && C:\Users\LBD\AppData\Roaming\Python\Python313\Scripts\ninja.exe -C build\native-colmap-port native_colmap -j 2"
+```
+
 If CMake cannot find a compiler, install Visual Studio Build Tools or use a
 Developer PowerShell. If dependency discovery fails on Windows, prefer WSL for
 development and keep Windows for wheel validation.
@@ -192,14 +202,16 @@ scale_correction:
   square_size_unit: mm
 
 colmap:
-  backend: native_colmap
-  matcher: ring
+  matcher: exhaustive
   matching_window: 2
   wrap_matching: true
-  use_gpu: false
-  multiple_models: false
-  min_model_size: 12     # set to camera count
+  max_features: 20000
   random_seed: 1
+  spatial_outlier_filter:
+    enabled: true
+    radius_mad_z: 8.0
+    knn: 8
+    knn_mad_z: 8.0
 
 dic2d:
   subset_radius: 20
@@ -213,8 +225,8 @@ recon3d:
   max_reprojection_error_px: 2.0
 ```
 
-For a different number of cameras, update `colmap.min_model_size` to that camera
-count or slightly lower if some cameras are expected to be unusable.
+The native selector requires every configured camera and reports per-camera
+observation coverage.
 
 ## Run The Pipeline
 
@@ -275,30 +287,37 @@ Reports and figures:
 ```text
 results/logs/sfm_report.json
 results/sfm/colmap/sparse_scene.png
+results/sfm/colmap/camera_observations_2d.png
 results/sfm/colmap/camera_observations_3d.png
-results/sfm/colmap/image_pairs.txt
+results/sfm/colmap/sparse_point_filter.json
 ```
 
 Good signs:
 
 - `backend` is `native_colmap`.
-- `native_colmap_steps` includes `ring_pair_matcher`.
-- One model contains most or all cameras.
-- `missing_cameras` is empty or explainable.
+- `native_colmap_backend` is `embedded_colmap_sparse_source`.
+- `native_colmap_capabilities.implementation` is
+  `colmap_sparse_source_port`.
+- One selected model contains every configured camera.
+- `missing_cameras` is empty.
+- Per-camera 2D observation counts are not zero or single-digit.
+- `sparse_point_filter.json` reports a conservative number of removed 3D
+  sparse outliers and `fallback_used: false`.
 - Mean reprojection error is low enough for the experiment resolution, commonly
   around sub-pixel to a few pixels.
 
 If SfM is bad:
 
 - Confirm camera folder order follows the physical camera ring/order.
-- Keep `matcher: ring` for circular multi-camera rigs.
-- Increase `matching_window` from `2` to `3` only if adjacent overlap is weak.
-- Use `wrap_matching: true` for a closed camera ring and `false` for a linear
-  camera row.
-- Lower `min_model_size` only if some cameras are truly expected to fail.
+- Keep `matcher: exhaustive` for the 12-camera cylinder case unless you are
+  intentionally trading accuracy for speed.
+- Inspect native candidate diagnostics when a camera fails registration or has
+  weak observations.
 - Increase `max_features` if texture is rich but matches are sparse.
-- Check repeated speckle ambiguity: exhaustive matching may create false
-  far-view matches, so do not switch to exhaustive as a first reaction.
+- Check `camera_observations_2d.png`; every camera should have broad red-point
+  coverage over the speckle region.
+- Check `sparse_scene.png`; camera centers should form one continuous rig, not
+  a split or flying layout.
 
 ### 3. Scale Correction
 
@@ -465,18 +484,29 @@ cmake --build build/wsl-native -j2
 python -c "import sys; sys.path[:0]=['build/wsl-native/colmap','build/wsl-native/recon3d']; import native_colmap, native_recon3d; print(native_colmap.capabilities())"
 ```
 
-For Windows, replace `build/wsl-native` with `build/windows-native`.
+For Windows, replace `build/wsl-native` with `build/windows-native`, or use the
+validated `build/native-colmap-port` COLMAP source-port command shown above.
+Expected native COLMAP capabilities include:
+
+```text
+implementation = colmap_sparse_source_port
+mapping = colmap_correspondence_graph_incremental_mapper
+refinement = colmap_local_and_global_ceres_bundle_adjustment
+```
 
 ### SfM creates multiple partial models
 
 Actions:
 
-- Keep `multiple_models: false`.
-- Set `min_model_size` to the camera count.
+- Require every configured camera in the selected native model.
 - Confirm camera naming order is physical order.
-- Keep `matcher: ring`.
-- Try `matching_window: 3` for weak overlap.
-- Inspect `results/sfm/colmap/image_pairs.txt`.
+- Inspect the multi-initial-pair candidate diagnostics in
+  `results/logs/sfm_report.json`.
+- Check `camera_observations_2d.png`, `camera_observations_3d.png`, and
+  `sparse_scene.png`.
+- Keep the selected model only if all configured cameras are registered, each
+  camera has reasonable observation coverage, and camera centers have no
+  obvious outliers.
 
 ### Checkerboard scale fails
 

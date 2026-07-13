@@ -1,60 +1,201 @@
+set(MDIC_COLMAP_DEPS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/.deps/Library" CACHE PATH
+    "Project-local CPU dependency prefix for the COLMAP sparse source port.")
+if(EXISTS "${MDIC_COLMAP_DEPS_DIR}")
+  list(PREPEND CMAKE_PREFIX_PATH
+    "${MDIC_COLMAP_DEPS_DIR}"
+    "${MDIC_COLMAP_DEPS_DIR}/lib/cmake"
+    "${MDIC_COLMAP_DEPS_DIR}/share/eigen3/cmake")
+endif()
+
 find_package(pybind11 CONFIG QUIET)
+find_package(Eigen3 CONFIG QUIET)
+find_package(Ceres CONFIG QUIET)
+find_package(glog CONFIG QUIET)
+find_package(Boost CONFIG QUIET COMPONENTS graph)
+find_package(SuiteSparse_config CONFIG QUIET)
+find_package(AMD CONFIG QUIET)
+find_package(COLAMD CONFIG QUIET)
+find_package(CAMD CONFIG QUIET)
+find_package(CCOLAMD CONFIG QUIET)
+find_package(CHOLMOD CONFIG QUIET)
+find_package(SQLite3 QUIET)
+foreach(_suite_component SuiteSparse_config AMD COLAMD CAMD CCOLAMD)
+  if(EXISTS "${MDIC_COLMAP_DEPS_DIR}/lib/cmake/${_suite_component}/${_suite_component}Config.cmake")
+    include("${MDIC_COLMAP_DEPS_DIR}/lib/cmake/${_suite_component}/${_suite_component}Config.cmake")
+  endif()
+endforeach()
+if(NOT TARGET SuiteSparse::CHOLMOD AND EXISTS "${MDIC_COLMAP_DEPS_DIR}/lib/cmake/CHOLMOD/CHOLMODTargets.cmake")
+  include("${MDIC_COLMAP_DEPS_DIR}/lib/cmake/CHOLMOD/CHOLMODTargets.cmake")
+endif()
+
+set(COLMAP_PORT_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
+
+if(EXISTS "${COLMAP_PORT_SRC_DIR}/thirdparty/PoseLib/CMakeLists.txt" AND NOT TARGET PoseLib::PoseLib)
+  set(PYTHON_PACKAGE OFF CACHE BOOL "" FORCE)
+  set(WITH_BENCHMARK OFF CACHE BOOL "" FORCE)
+  add_subdirectory("${COLMAP_PORT_SRC_DIR}/thirdparty/PoseLib"
+                   "${CMAKE_CURRENT_BINARY_DIR}/poselib" EXCLUDE_FROM_ALL)
+  if(TARGET PoseLib AND NOT TARGET PoseLib::PoseLib)
+    add_library(PoseLib::PoseLib ALIAS PoseLib)
+  endif()
+endif()
+
+set(MDIC_COLMAP_SPARSE_READY OFF)
+if(Eigen3_FOUND
+   AND Ceres_FOUND
+   AND TARGET glog::glog
+   AND Boost_FOUND
+   AND TARGET SuiteSparse::CHOLMOD
+   AND SQLite3_FOUND
+   AND TARGET SQLite3::SQLite3
+   AND TARGET PoseLib::PoseLib
+   AND EXISTS "${COLMAP_PORT_SRC_DIR}/colmap/sfm/incremental_mapper.cc")
+  set(MDIC_COLMAP_SPARSE_READY ON)
+endif()
+
+if(MDIC_COLMAP_SPARSE_READY)
+  add_library(mdic_colmap_sparse STATIC
+    # Feature/scene data types and utility support used by the mapper.
+    "${COLMAP_PORT_SRC_DIR}/colmap/feature/types.cc"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/colmap_bitmap_stub.cpp"
+    "${COLMAP_PORT_SRC_DIR}/colmap/util/base_controller.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/util/endian.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/util/file.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/util/logging.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/util/misc.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/util/ply.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/util/string.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/util/threading.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/util/timer.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/util/version.cc"
+
+    # CPU math/geometry/optimization.
+    "${COLMAP_PORT_SRC_DIR}/colmap/math/graph_cut.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/math/math.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/math/polynomial.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/math/random.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/math/spanning_tree.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/geometry/bbox.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/geometry/essential_matrix.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/geometry/gps.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/geometry/homography_matrix.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/geometry/normalization.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/geometry/pose.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/geometry/pose_prior.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/geometry/rigid3.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/geometry/sim3.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/geometry/triangulation.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/image/line.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/optim/combination_sampler.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/optim/least_absolute_deviations.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/optim/progressive_sampler.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/optim/random_sampler.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/optim/sprt.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/optim/support_measurement.cc"
+
+    # Camera/rig/database-cache/reconstruction model.
+    "${COLMAP_PORT_SRC_DIR}/colmap/sensor/database.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/sensor/models.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/sensor/rig.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/sensor/specs.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/scene/camera.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/scene/correspondence_graph.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/scene/database.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/scene/database_cache.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/scene/database_sqlite.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/scene/frame.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/scene/image.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/scene/point2d.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/scene/point3d.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/scene/pose_graph.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/scene/projection.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/scene/reconstruction.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/scene/reconstruction_clustering.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/scene/reconstruction_io.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/scene/reconstruction_io_binary.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/scene/reconstruction_io_text.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/scene/reconstruction_io_utils.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/scene/reconstruction_manager.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/scene/reconstruction_pruning.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/scene/rig.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/scene/scene_clustering.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/scene/synthetic.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/scene/track.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/scene/two_view_geometry.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/scene/visibility_pyramid.cc"
+
+    # Estimators, Ceres BA and incremental SfM.
+    "${COLMAP_PORT_SRC_DIR}/colmap/estimators/alignment.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/estimators/bundle_adjustment.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/estimators/bundle_adjustment_ceres.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/estimators/coordinate_frame.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/estimators/covariance.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/estimators/generalized_pose.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/estimators/global_positioning.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/estimators/gravity_refinement.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/estimators/pose.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/estimators/rotation_averaging.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/estimators/rotation_averaging_impl.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/estimators/triangulation.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/estimators/two_view_geometry.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/estimators/view_graph_calibration.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/estimators/solvers/absolute_pose.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/estimators/solvers/affine_transform.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/estimators/solvers/essential_matrix.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/estimators/solvers/fundamental_matrix.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/estimators/solvers/generalized_absolute_pose.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/estimators/solvers/generalized_relative_pose.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/estimators/solvers/homography_matrix.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/estimators/solvers/poselib_utils.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/estimators/solvers/similarity_transform.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/sfm/incremental_mapper.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/sfm/incremental_mapper_impl.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/sfm/incremental_triangulator.cc"
+    "${COLMAP_PORT_SRC_DIR}/colmap/sfm/observation_manager.cc"
+  )
+  target_compile_features(mdic_colmap_sparse PUBLIC cxx_std_17)
+  target_include_directories(mdic_colmap_sparse PUBLIC
+    "${COLMAP_PORT_SRC_DIR}"
+    "${COLMAP_PORT_SRC_DIR}/thirdparty/PoseLib")
+  target_compile_definitions(mdic_colmap_sparse PUBLIC
+    GLOG_NO_ABBREVIATED_SEVERITIES
+    GLOG_VERSION_MAJOR=0
+    GLOG_VERSION_MINOR=7
+    NOMINMAX
+    WIN32_LEAN_AND_MEAN)
+  target_link_libraries(mdic_colmap_sparse PUBLIC
+    Eigen3::Eigen
+    Ceres::ceres
+    glog::glog
+    Boost::graph
+    SuiteSparse::CHOLMOD
+    SQLite3::SQLite3
+    PoseLib::PoseLib)
+  if(MSVC)
+    target_compile_options(mdic_colmap_sparse PRIVATE /bigobj /W3 /permissive-)
+  endif()
+else()
+  message(FATAL_ERROR
+    "Native COLMAP sparse SfM dependencies are incomplete. Multi-DIC no longer "
+    "provides an alternate SfM backend.")
+endif()
 
 if(pybind11_FOUND)
-  set(MDIC_DEFAULT_COLMAP_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/upstream")
-  set(MDIC_COLMAP_SOURCE_DIR "" CACHE PATH "Optional COLMAP source tree used to build the embedded CPU SfM backend.")
-  set(MDIC_WITH_EMBEDDED_COLMAP OFF)
-
-  if(NOT MDIC_COLMAP_SOURCE_DIR AND EXISTS "${MDIC_DEFAULT_COLMAP_SOURCE_DIR}/CMakeLists.txt")
-    set(MDIC_COLMAP_SOURCE_DIR "${MDIC_DEFAULT_COLMAP_SOURCE_DIR}")
-  endif()
-
-  if(MDIC_COLMAP_SOURCE_DIR)
-    get_filename_component(MDIC_COLMAP_SOURCE_DIR "${MDIC_COLMAP_SOURCE_DIR}" ABSOLUTE)
-    if(EXISTS "${MDIC_COLMAP_SOURCE_DIR}/CMakeLists.txt")
-      set(CUDA_ENABLED OFF CACHE BOOL "" FORCE)
-      set(GUI_ENABLED OFF CACHE BOOL "" FORCE)
-      set(MVS_ENABLED OFF CACHE BOOL "" FORCE)
-      set(OPENGL_ENABLED OFF CACHE BOOL "" FORCE)
-      set(ONNX_ENABLED OFF CACHE BOOL "" FORCE)
-      set(CGAL_ENABLED OFF CACHE BOOL "" FORCE)
-      set(LSD_ENABLED OFF CACHE BOOL "" FORCE)
-      set(TESTS_ENABLED OFF CACHE BOOL "" FORCE)
-      set(BENCHMARK_ENABLED OFF CACHE BOOL "" FORCE)
-      set(UNINSTALL_ENABLED OFF CACHE BOOL "" FORCE)
-      set(DOWNLOAD_ENABLED OFF CACHE BOOL "" FORCE)
-      set(MDIC_COLMAP_THIRDPARTY_DIR "${MDIC_COLMAP_SOURCE_DIR}/src/thirdparty")
-      if(EXISTS "${MDIC_COLMAP_THIRDPARTY_DIR}/PoseLib/CMakeLists.txt")
-        set(FETCHCONTENT_SOURCE_DIR_POSELIB "${MDIC_COLMAP_THIRDPARTY_DIR}/PoseLib" CACHE PATH "" FORCE)
-      endif()
-      if(EXISTS "${MDIC_COLMAP_THIRDPARTY_DIR}/faiss/CMakeLists.txt")
-        set(FETCHCONTENT_SOURCE_DIR_FAISS "${MDIC_COLMAP_THIRDPARTY_DIR}/faiss" CACHE PATH "" FORCE)
-      endif()
-      add_subdirectory("${MDIC_COLMAP_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/colmap-src" EXCLUDE_FROM_ALL)
-      set(MDIC_WITH_EMBEDDED_COLMAP ON)
-    else()
-      message(FATAL_ERROR "MDIC_COLMAP_SOURCE_DIR does not point to a COLMAP source tree: ${MDIC_COLMAP_SOURCE_DIR}")
-    endif()
-  endif()
-
-  pybind11_add_module(native_colmap src/colmap_bindings.cpp)
+  pybind11_add_module(native_colmap
+    src/colmap_bindings.cpp
+    src/colmap_sparse_mapper.cpp
+    src/feature.cpp
+    src/geometry.cpp
+    src/incremental_sfm.cpp
+    src/model_io.cpp
+  )
   target_compile_features(native_colmap PRIVATE cxx_std_17)
-  if(MDIC_WITH_EMBEDDED_COLMAP)
-    target_compile_definitions(native_colmap PRIVATE MDIC_WITH_EMBEDDED_COLMAP=1)
-    target_include_directories(native_colmap PRIVATE "${MDIC_COLMAP_SOURCE_DIR}/src")
-    target_link_libraries(native_colmap
-      PRIVATE
-        colmap_controllers
-        colmap_feature
-        colmap_sfm
-        colmap_scene
-        colmap_sensor
-        colmap_util
-        colmap_vlfeat
-    )
-  endif()
+  target_include_directories(native_colmap PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
+  target_compile_definitions(native_colmap PRIVATE PYBIND11_DETAILED_ERROR_MESSAGES=1)
+  target_link_libraries(native_colmap PRIVATE mdic_colmap_sparse)
+  target_compile_definitions(native_colmap PRIVATE MDIC_HAS_COLMAP_SPARSE_SOURCE=1)
   if(MSVC)
-    target_compile_options(native_colmap PRIVATE /W4)
+    target_compile_options(native_colmap PRIVATE /W4 /permissive-)
   else()
     target_compile_options(native_colmap PRIVATE -Wall -Wextra -Wpedantic)
   endif()

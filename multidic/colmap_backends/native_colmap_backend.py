@@ -2,6 +2,10 @@ from __future__ import annotations
 
 import shutil
 import time
+import os
+import sys
+import importlib.machinery
+import importlib.util
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -9,7 +13,7 @@ from typing import Any
 import numpy as np
 
 from .base import BackendUnavailableError, SfmPaths
-from .pycolmap_backend import _export_ndef_sfm_products, _select_best_reconstruction, _summarize_reconstructions
+from .products import _export_ndef_sfm_products, _select_best_reconstruction, _summarize_reconstructions
 
 
 class NativeColmapBackend:
@@ -20,17 +24,16 @@ class NativeColmapBackend:
 
     def run(self, paths: SfmPaths, image_names: list[str], report: dict) -> list[dict]:
         try:
-            import native_colmap
+            native_colmap = self._import_native_colmap()
         except ImportError as exc:
             raise BackendUnavailableError(
                 "native_colmap is not available. Build the native extension first, for example: "
                 "python -m pip install -e ."
             ) from exc
-        if not native_colmap.has_embedded_colmap() and not bool(self.options.get("allow_external_executable", False)):
+        if not native_colmap.has_embedded_colmap():
             raise BackendUnavailableError(
-                "native_colmap was built without the embedded COLMAP CPU backend. "
-                "Rebuild with -DMDIC_COLMAP_SOURCE_DIR=/path/to/colmap, or set "
-                "colmap.allow_external_executable: true to use a system colmap executable as a development fallback."
+                "native_colmap was built without the compact embedded CPU SfM backend. "
+                "Reinstall the project so native/colmap/src is compiled."
             )
 
         self._prepare_workspace(paths)
@@ -40,7 +43,6 @@ class NativeColmapBackend:
             report,
             "native_colmap_cpu_sfm",
             native_colmap.run_cpu_sfm,
-            str(self.options.get("executable", "colmap")),
             str(paths.database_path),
             str(paths.image_root),
             str(paths.sparse_root),
@@ -71,6 +73,7 @@ class NativeColmapBackend:
                 reference_camera=str(self.options.get("reference_camera", "cam_0")),
                 max_reproj_error=float(self.options.get("max_reproj_error", 4.0)),
                 dpi=int(self.options.get("dpi", 180)),
+                spatial_outlier_filter=self.options.get("spatial_outlier_filter"),
             )
             report["selected_model_id"] = int(best_model_id)
             report["products"] = products
@@ -89,6 +92,39 @@ class NativeColmapBackend:
                 "See report['native_colmap_models'] and report['command_logs'] for diagnostics."
             )
         return summaries
+
+    @staticmethod
+    def _add_native_dll_directories() -> None:
+        root = Path(__file__).resolve().parents[2]
+        candidates = [
+            root / "native" / "colmap" / ".deps" / "Library" / "bin",
+            root / "native" / "colmap" / ".deps",
+        ]
+        build_module_dir = root / "build" / "native-colmap-port" / "colmap"
+        if any(build_module_dir.glob("native_colmap*.pyd")):
+            sys.path.insert(0, str(build_module_dir))
+        add_dll_directory = getattr(os, "add_dll_directory", None)
+        for candidate in candidates:
+            if not candidate.exists():
+                continue
+            if add_dll_directory is not None:
+                add_dll_directory(str(candidate))
+            os.environ["PATH"] = str(candidate) + os.pathsep + os.environ.get("PATH", "")
+
+    @classmethod
+    def _import_native_colmap(cls) -> Any:
+        """Prefer the just-built extension over an editable install's stale finder."""
+        cls._add_native_dll_directories()
+        root = Path(__file__).resolve().parents[2]
+        build_module_dir = root / "build" / "native-colmap-port" / "colmap"
+        spec = importlib.machinery.PathFinder.find_spec("native_colmap", [str(build_module_dir)])
+        if spec is not None and spec.loader is not None:
+            module = importlib.util.module_from_spec(spec)
+            sys.modules["native_colmap"] = module
+            spec.loader.exec_module(module)
+            return module
+        import native_colmap
+        return native_colmap
 
     def _prepare_workspace(self, paths: SfmPaths) -> None:
         paths.workspace.mkdir(parents=True, exist_ok=True)
@@ -235,8 +271,9 @@ def _registered_camera_names(reconstruction: _TextReconstruction, camera_names: 
 
 
 def _model_summary(model_id: int, reconstruction: _TextReconstruction, camera_names: tuple[str, ...]) -> dict[str, Any]:
-    registered = sorted(_registered_camera_names(reconstruction, camera_names))
-    missing = sorted(set(camera_names) - set(registered))
+    registered_set = _registered_camera_names(reconstruction, camera_names)
+    registered = [name for name in camera_names if name in registered_set]
+    missing = [name for name in camera_names if name not in registered_set]
     return {
         "model_id": int(model_id),
         "num_registered_images": reconstruction.num_reg_images(),

@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
+import site
 import subprocess
+import sysconfig
 import tempfile
 from importlib.resources import files
 from pathlib import Path
@@ -48,13 +51,29 @@ def run_dic2d(config: MDICConfig) -> dict[str, Any]:
     output_dir.mkdir(parents=True, exist_ok=True)
     native_dic = _normalize_dic2d_config(dic_raw, roi_raw)
     native_cli = _native_cli_path(config)
+    if native_cli is None:
+        report["errors"].append(
+            "ncorr_cli was not found. Reinstall the project so the native CLI is placed in "
+            "pymultidic/bin, or build native/ncorr before running dic2d."
+        )
+        report["native_status"] = "missing"
+        _write_dic2d_report(config, report)
+        return report
 
     for cam_id, cam_name in enumerate(cam_names):
         try:
             roi_path, roi_mode = _resolve_roi_path(config, cam_name, paths["auto_mask_dir"], roi_raw)
             roi_mask = _read_mask(roi_path, int(roi_raw.get("external_threshold", 127)))
-            observation, seed = _select_seed(observations, cam_id, roi_mask, native_dic)
+            reference_for_seed = _read_gray_image(config.speckle_root / cam_name / config.data.reference_frame)
+            observation, seed = _select_seed(observations, cam_id, roi_mask, native_dic, reference_for_seed)
             frames = _run_camera_frames(config, cam_name, roi_mask, observation, seed, native_dic, native_cli, output_dir)
+            failed_frames = [frame for frame in frames if not bool(frame.get("ok", False))]
+            if failed_frames:
+                details = "; ".join(
+                    f"{frame.get('deformed_frame')}: {frame.get('error', frame.get('message', 'native CLI failed'))}"
+                    for frame in failed_frames
+                )
+                report["errors"].append(f"{cam_name}: {details}")
             report["cameras"].append(
                 {
                     "cam_id": cam_id,
@@ -67,7 +86,7 @@ def run_dic2d(config: MDICConfig) -> dict[str, Any]:
                     "roi_min_region_area": int(native_dic.get("roi_min_region_area", 2000)),
                     "native_cli": str(native_cli) if native_cli is not None else None,
                     "frames": frames,
-                    "status": "native_core_pending" if native_cli is None else "native_affine_grid_dic",
+                    "status": "native_error" if failed_frames else "native_affine_grid_dic",
                 }
             )
         except Exception as exc:
@@ -113,6 +132,15 @@ def _native_cli_path(config: MDICConfig) -> Path | None:
         candidates.append(Path(str(files("pymultidic").joinpath("bin", exe_name))))
     except Exception:
         pass
+    command_path = shutil.which(exe_name)
+    if command_path:
+        candidates.append(Path(command_path))
+    candidates.extend(
+        [
+            Path(site.getusersitepackages()) / "pymultidic" / "bin" / exe_name,
+            Path(sysconfig.get_path("purelib")) / "pymultidic" / "bin" / exe_name,
+        ]
+    )
     candidates.extend(
         [
             config.workspace_root / "build" / "wsl-native" / "ncorr" / "ncorr_cli",
@@ -159,6 +187,8 @@ def _run_camera_frames(
         else:
             deformed = _read_gray_image(deformed_path)
             result_path = output_dir / f"dic2d_{cam_name}_{Path(frame_name).stem}.npz"
+            if result_path.exists():
+                result_path.unlink()
             frame_report.update(
                 _call_native_cli(native_cli, reference, deformed, roi_mask, observation, seed, dic_raw, result_path)
             )
@@ -448,14 +478,35 @@ def _read_mask(path: Path, threshold: int) -> np.ndarray:
     return np.asarray(data > threshold, dtype=bool)
 
 
-def _select_seed(observations: dict[str, np.ndarray], cam_id: int, roi_mask: np.ndarray, dic_raw: dict[str, Any]) -> tuple[np.ndarray, np.ndarray]:
+def _select_seed(
+    observations: dict[str, np.ndarray],
+    cam_id: int,
+    roi_mask: np.ndarray,
+    dic_raw: dict[str, Any],
+    reference_image: np.ndarray | None = None,
+) -> tuple[np.ndarray, np.ndarray]:
     uv = observations["uv"][observations["cam_indices"] == cam_id].astype(np.float64)
     height, width = roi_mask.shape[:2]
+    candidates: list[tuple[float, np.ndarray, np.ndarray]] = []
+    subset_radius = int(dic_raw.get("subset_radius", 20))
     for point in uv:
         x = int(round(float(point[0])))
         y = int(round(float(point[1])))
         if 0 <= x < width and 0 <= y < height and bool(roi_mask[y, x]):
-            return point, _snap_to_ncorr_grid_inside_roi(point, roi_mask, dic_raw)
+            seed = _snap_to_ncorr_grid_inside_roi(point, roi_mask, dic_raw)
+            score = 0.0
+            if reference_image is not None:
+                sx, sy = int(seed[0]), int(seed[1])
+                patch = reference_image[
+                    sy - subset_radius : sy + subset_radius + 1,
+                    sx - subset_radius : sx + subset_radius + 1,
+                ]
+                if patch.size:
+                    score = float(np.std(patch))
+            candidates.append((score, point, seed))
+    if candidates:
+        _, observation, seed = max(candidates, key=lambda item: item[0])
+        return observation, seed
     raise ValueError("No COLMAP observation falls inside the ROI mask.")
 
 

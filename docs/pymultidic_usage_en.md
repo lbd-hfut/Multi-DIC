@@ -78,8 +78,7 @@ print(report["ok"])
 ```
 
 If you installed a working wheel from PyPI and you are not editing native source
-code, you do not need a local C++ compiler, CMake, COLMAP executable, or
-pycolmap.
+code, you do not need a local C++ compiler or CMake.
 
 ## Chapter 1. Project Scope And Implementation
 
@@ -152,10 +151,14 @@ The supported local native build entry point is `native/CMakeLists.txt`. The
 normal package user should not need to compile these locally if a wheel is
 available for the platform.
 
-`native_colmap` is designed to avoid a runtime dependency on `pycolmap` and to
-avoid requiring users to download a separate COLMAP executable. It keeps the
-needed COLMAP CPU source under `native/colmap` and exposes a narrow pybind11
-API for this project.
+`native_colmap` is the only SfM implementation. It keeps the required COLMAP
+CPU sparse source under `native/colmap/src`, exposes a narrow pybind11 API, and
+does not call an external `colmap.exe` at runtime. The embedded mapper runs the
+trimmed COLMAP CorrespondenceGraph, IncrementalMapper, IncrementalTriangulator,
+and local/global Ceres bundle-adjustment code. It tries multiple initial image
+pairs, scores candidate models by registration completeness, per-camera
+observations, camera-center outliers, reprojection error, and 2D coverage, then
+exports the selected model.
 
 ## Chapter 2. Installation
 
@@ -194,8 +197,6 @@ python -c "import pymultidic; print(pymultidic.__version__)"
 If the wheel includes the native modules for your platform, no local C++
 compiler setup is required. You should not need:
 
-- A local COLMAP executable.
-- `pycolmap`.
 - A local `native/` build.
 - CMake or Ninja.
 
@@ -220,12 +221,23 @@ cmake -S native -B build/windows-native -G Ninja -DPYBIND11_FINDPYTHON=ON
 cmake --build build/windows-native
 ```
 
+The validated Windows COLMAP source-port build on this checkout uses a
+dedicated `build/native-colmap-port` tree and the project-local Visual Studio
+Build Tools:
+
+```powershell
+cmd /c ""C:\01project\ncorr\.tools\vsbt\VC\Auxiliary\Build\vcvars64.bat" >nul && python -m cmake -S native -B build\native-colmap-port -G Ninja -DCMAKE_MAKE_PROGRAM=C:\Users\LBD\AppData\Roaming\Python\Python313\Scripts\ninja.exe -DCMAKE_BUILD_TYPE=Release -DPYBIND11_FINDPYTHON=OFF -Dpybind11_DIR=C:\Users\LBD\AppData\Roaming\Python\Python313\site-packages\pybind11\share\cmake\pybind11"
+cmd /c ""C:\01project\ncorr\.tools\vsbt\VC\Auxiliary\Build\vcvars64.bat" >nul && C:\Users\LBD\AppData\Roaming\Python\Python313\Scripts\ninja.exe -C build\native-colmap-port native_colmap -j 2"
+```
+
 Expected outputs:
 
 ```text
 build/windows-native/ncorr/ncorr_cli.exe
 build/windows-native/recon3d/native_recon3d*.pyd
 build/windows-native/colmap/native_colmap*.pyd
+build/native-colmap-port/colmap/native_colmap*.pyd
+build/native-colmap-port/colmap/mdic_colmap_sparse.lib
 ```
 
 If CMake cannot find a compiler, run from a Developer PowerShell or install the
@@ -343,7 +355,9 @@ PY
 
 If running through `run.py`, the script automatically prefers local native build
 folders such as `build/wsl-native/colmap`, `build/wsl-native/recon3d`,
-`build/windows-native/colmap`, and `build/windows-native/recon3d`.
+`build/windows-native/colmap`, `build/windows-native/recon3d`, and
+`build/native-colmap-port/colmap`. This keeps stale editable installs from
+shadowing the extension that was just built.
 
 ## Chapter 3. Running The Full Workflow
 
@@ -380,7 +394,7 @@ The default meaning is:
 - `results/`: generated output folder.
 
 Camera folder names should follow the physical camera order when using the
-default `ring` matcher. For a circular camera rig, `cam_0`, `cam_1`, ...,
+optional `ring` matcher. For a circular camera rig, `cam_0`, `cam_1`, ...,
 `cam_N` should follow the ring order.
 
 ### 3.2 Run The Whole Pipeline
@@ -465,8 +479,9 @@ results/sfm/colmap/cameras.json
 results/sfm/colmap/sparse_points.npz
 results/sfm/colmap/observations.npz
 results/sfm/colmap/sparse_scene.png
+results/sfm/colmap/camera_observations_2d.png
 results/sfm/colmap/camera_observations_3d.png
-results/sfm/colmap/image_pairs.txt
+results/sfm/colmap/sparse_point_filter.json
 ```
 
 Example SfM visualizations:
@@ -477,21 +492,32 @@ Example SfM visualizations:
 
 What to check without ground truth:
 
-- `backend` is `native_colmap` unless explicitly changed.
-- `native_colmap_steps` includes `ring_pair_matcher`.
-- All or most cameras are registered in one model.
-- `missing_cameras` is empty or explainable.
+- `backend` is `native_colmap`.
+- `native_colmap_backend` is `embedded_colmap_sparse_source`.
+- `native_colmap_capabilities.implementation` is
+  `colmap_sparse_source_port`.
+- `native_colmap_steps` includes feature extraction, verified matching,
+  multi-initial-pair incremental mapping, sparse global BA, and text-model
+  export.
+- All configured cameras are registered in one selected model.
+- `missing_cameras` is empty.
+- Each camera has reasonable 2D observation coverage, not zero or single-digit
+  observations.
 - Mean reprojection error is reasonable for the image resolution.
-- `image_pairs.txt` follows the expected physical camera order.
+- `sparse_point_filter.json` reports 3D sparse-point outlier removal before
+  the exported observations and figures are generated.
 
 Common fixes:
 
-- Keep `matcher: ring` for circular multi-camera rigs.
-- Increase `matching_window` from `2` to `3` only if adjacent overlap is weak.
-- Use `wrap_matching: true` for a closed ring and `false` for a linear row.
-- Keep `multiple_models: false` for one expected rig.
-- Set `min_model_size` to the expected camera count, or slightly lower if some
-  cameras are known to be unusable.
+- Keep `matcher: exhaustive` for the 12-camera cylinder case when accuracy is
+  the priority; the sparse source port benefits from multi-view tracks.
+- Inspect native candidate diagnostics when a camera fails registration or has
+  weak observations.
+- Increase `max_features` if rich speckle texture still produces sparse
+  matches.
+- Check `camera_observations_2d.png` for broad per-camera red-point coverage.
+- Check `sparse_scene.png` for one continuous camera rig with no flying camera
+  center.
 
 ### 3.5 Module 3: scale
 
@@ -678,13 +704,16 @@ Summary:
 
 | Metric | Value |
 | --- | --- |
-| SfM backend | `native_colmap` |
-| Matcher step | `ring_pair_matcher` |
+| SfM backend | embedded `native_colmap` sparse source port |
+| Native backend | `embedded_colmap_sparse_source` |
+| COLMAP implementation | `colmap_sparse_source_port` |
+| Matcher | `exhaustive` |
 | Registered cameras | 12 / 12 |
-| Sparse points | 3606 |
-| Mean SfM reprojection error | 0.320048 px |
-| Valid 3D tracks | 3548 / 3606 |
-| Median displacement norm | 0.4986629583621337 |
+| Native sparse points | 14403 |
+| Exported sparse points after 3D outlier cleaning | 14367 |
+| Mean SfM reprojection error | 0.109651 px |
+| Valid 3D points | 12926 / 14367 |
+| Median displacement norm | 0.5081374654088713 |
 
 3D morphology:
 
@@ -786,8 +815,7 @@ Commonly modified fields:
 | `data.deformed_frames` | Deformed frame names. |
 | `scale_correction.square_size` | Physical checkerboard square size. |
 | `scale_correction.square_size_unit` | Physical unit, such as `mm`. |
-| `colmap.min_model_size` | Expected camera count. |
-| `colmap.matching_window` | Neighbor range for ring matching. |
+| `colmap.matching_window` | Neighbor range when using windowed ring matching. |
 | `dic2d.subset_radius` | DIC subset radius. |
 | `dic2d.subset_spacing` | DIC point spacing. |
 | `dic2d.seed_search_radius` | Search range for large displacement. |
@@ -902,33 +930,40 @@ Less commonly modified fields:
 
 | Parameter | Default | Meaning |
 | --- | --- | --- |
-| `backend` | `native_colmap` | SfM backend. |
-| `executable` | `colmap` | External executable name, development fallback only. |
-| `allow_external_executable` | `false` | Permit external executable fallback. |
 | `workspace` | `colmap` | SfM workspace folder under `results/sfm`. |
 | `reference_camera` | `cam_0` | Reference camera name. |
 | `camera_model` | `SIMPLE_RADIAL` | COLMAP camera model. |
-| `matcher` | `ring` | Matching strategy. |
+| `matcher` | `exhaustive` | Matching strategy; recommended for the embedded sparse-source backend. |
 | `matching_window` | `2` | Neighbor range for ring/imported matching. |
 | `wrap_matching` | `true` | Connect end cameras in a ring. |
-| `use_gpu` | `false` | GPU flag; native backend is CPU-only. |
 | `overwrite` | `true` | Overwrite previous SfM workspace. |
-| `max_features` | `8192` | SIFT feature limit. |
+| `max_features` | `20000` | SIFT feature limit. |
 | `first_octave` | `-1` | SIFT first octave. |
+| `feature_grid_columns` | `12` | Grid used to balance feature candidates horizontally. |
+| `feature_grid_rows` | `9` | Grid used to balance feature candidates vertically. |
+| `feature_candidate_multiplier` | `4` | Candidate multiplier before grid-balanced feature selection. |
+| `initial_focal_length_factor` | `1.6` | Initial focal length divided by maximum image dimension. |
 | `cross_check` | `false` | Feature matching cross-check. |
 | `min_num_matches` | `8` | Minimum matches per pair. |
-| `multiple_models` | `false` | Allow multiple sparse models. |
-| `min_model_size` | `12` | Minimum registered images in a model. |
+| `initial_image1` | optional | Preferred initial image index; still scored with other candidate pairs. |
+| `initial_image2` | optional | Preferred paired initial image index. |
 | `init_min_num_inliers` | `50` | Initial pair inlier threshold. |
 | `init_max_error` | `4.0` | Initial pair max error. |
-| `abs_pose_min_num_inliers` | `15` | Absolute pose inlier threshold. |
+| `abs_pose_min_num_inliers` | `12` | Absolute pose inlier threshold. |
 | `abs_pose_min_inlier_ratio` | `0.05` | Absolute pose inlier ratio. |
 | `abs_pose_max_error` | `12.0` | Absolute pose max error. |
 | `filter_max_reproj_error` | `4.0` | Mapper filtering threshold. |
 | `abs_pose_refine_focal_length` | `true` | Refine focal length during pose estimation. |
 | `abs_pose_refine_extra_params` | `true` | Refine extra camera parameters. |
 | `ba_global_max_refinements` | `5` | Global BA refinement limit. |
+| `ba_global_max_num_iterations` | `50` | Sparse global BA evaluation limit. |
 | `max_reproj_error` | `4.0` | Export/filter reprojection threshold. |
+| `spatial_outlier_filter.enabled` | `true` | Enable 3D sparse-point distribution cleaning before exports. |
+| `spatial_outlier_filter.min_points` | `200` | Minimum sparse points before spatial cleaning is attempted. |
+| `spatial_outlier_filter.radius_mad_z` | `8.0` | Robust radius threshold for 3D sparse-point outliers. |
+| `spatial_outlier_filter.knn` | `8` | 3D neighbor count for density outlier detection. |
+| `spatial_outlier_filter.knn_mad_z` | `8.0` | Robust KNN distance threshold. |
+| `spatial_outlier_filter.min_keep_ratio` | `0.5` | Safety fallback if spatial filtering would remove too much. |
 | `dpi` | `180` | SfM figure DPI. |
 | `min_focal_length_ratio` | `0.1` | COLMAP focal-length sanity lower bound. |
 | `max_focal_length_ratio` | `10.0` | COLMAP focal-length sanity upper bound. |
@@ -1048,30 +1083,30 @@ Flat algorithm overrides:
 | `units_per_pixel` | `1.0` | `dic2d.format.units_per_pixel` |
 | `cutoff_corrcoef` | `0.6` | `dic2d.format.cutoff_corrcoef` |
 | `lenscoef` | `0.0` | `dic2d.format.lenscoef` |
-| `colmap_backend` | `native_colmap` | `colmap.backend` |
-| `colmap_executable` | `colmap` | `colmap.executable` |
 | `colmap_workspace` | `colmap` | `colmap.workspace` |
 | `reference_camera` | `cam_0` | `colmap.reference_camera` |
 | `camera_model` | `SIMPLE_RADIAL` | `colmap.camera_model` |
-| `matcher` | `ring` | `colmap.matcher` |
+| `matcher` | `exhaustive` | `colmap.matcher` |
 | `matching_window` | `2` | `colmap.matching_window` |
 | `wrap_matching` | `True` | `colmap.wrap_matching` |
-| `use_gpu` | `False` | `colmap.use_gpu` |
-| `max_features` | `8192` | `colmap.max_features` |
+| `max_features` | `20000` | `colmap.max_features` |
 | `first_octave` | `-1` | `colmap.first_octave` |
+| `feature_grid_columns` | `12` | `colmap.feature_grid_columns` |
+| `feature_grid_rows` | `9` | `colmap.feature_grid_rows` |
+| `feature_candidate_multiplier` | `4` | `colmap.feature_candidate_multiplier` |
+| `initial_focal_length_factor` | `1.6` | `colmap.initial_focal_length_factor` |
 | `cross_check` | `False` | `colmap.cross_check` |
 | `min_num_matches` | `8` | `colmap.min_num_matches` |
-| `multiple_models` | `False` | `colmap.multiple_models` |
-| `min_model_size` | `12` | `colmap.min_model_size` |
 | `init_min_num_inliers` | `50` | `colmap.init_min_num_inliers` |
 | `init_max_error` | `4.0` | `colmap.init_max_error` |
-| `abs_pose_min_num_inliers` | `15` | `colmap.abs_pose_min_num_inliers` |
+| `abs_pose_min_num_inliers` | `12` | `colmap.abs_pose_min_num_inliers` |
 | `abs_pose_min_inlier_ratio` | `0.05` | `colmap.abs_pose_min_inlier_ratio` |
 | `abs_pose_max_error` | `12.0` | `colmap.abs_pose_max_error` |
 | `filter_max_reproj_error` | `4.0` | `colmap.filter_max_reproj_error` |
 | `abs_pose_refine_focal_length` | `True` | `colmap.abs_pose_refine_focal_length` |
 | `abs_pose_refine_extra_params` | `True` | `colmap.abs_pose_refine_extra_params` |
 | `ba_global_max_refinements` | `5` | `colmap.ba_global_max_refinements` |
+| `ba_global_max_num_iterations` | `50` | `colmap.ba_global_max_num_iterations` |
 | `colmap_random_seed` | `1` | `colmap.random_seed` |
 | `recon_backend` | `native` | `recon3d.backend` |
 | `min_views` | `2` | `recon3d.min_views` |
@@ -1158,7 +1193,7 @@ through `run.py`.
 
 Goal:
 
-Run CPU-only SfM using `native_colmap` by default.
+Run the embedded CPU-only native COLMAP SfM pipeline.
 
 Explicit example:
 
@@ -1167,18 +1202,18 @@ report = pymultidic.run_sfm(
     config=None,
     case_root="case/CylinderDIC",
     project_name="CylinderDIC",
-    colmap_backend="native_colmap",
-    matcher="ring",
+    matcher="exhaustive",
+    max_features=20000,
     matching_window=2,
     wrap_matching=True,
-    min_model_size=12,
 )
 ```
 
 Important explicit parameters:
 
-`colmap_backend`, `matcher`, `matching_window`, `wrap_matching`,
-`min_model_size`, `max_features`, `min_num_matches`, `colmap_random_seed`.
+`matcher`, `matching_window`, `wrap_matching`, `max_features`,
+`feature_grid_columns`, `feature_grid_rows`, `min_num_matches`,
+`abs_pose_min_num_inliers`, `filter_max_reproj_error`, `colmap_random_seed`.
 
 Output:
 
@@ -1412,7 +1447,7 @@ flowchart TD
 ```mermaid
 flowchart TD
     A["validate failed"] --> A1["Fix folder names, frame names, camera count"]
-    B["sfm failed"] --> B1["Check camera order, matcher, overlap, min_model_size"]
+    B["sfm failed"] --> B1["Check camera order, matcher, overlap, and native candidate diagnostics"]
     C["scale failed"] --> C1["Check square_size, checkerboard_meta, corner overlays"]
     D["mask failed"] --> D1["Inspect overlays or provide user masks"]
     E["dic2d failed"] --> E1["Tune subset_radius, subset_spacing, seed_search_radius"]
@@ -1460,10 +1495,10 @@ common = dict(
     deformed_frames=["002.bmp"],
     square_size=10.0,
     square_size_unit="mm",
-    matcher="ring",
+    matcher="exhaustive",
     matching_window=2,
     wrap_matching=True,
-    min_model_size=12,
+    max_features=20000,
     subset_radius=20,
     subset_spacing=5,
     min_corrcoef=0.6,
@@ -1500,8 +1535,7 @@ of PyMultiDIC is integration and packaging:
 - Organizing a reproducible real-experiment workflow.
 - Providing a Python API around the full pipeline.
 - Extracting and compiling the CPU-only native pieces needed by this package.
-- Avoiding a runtime dependency on `pycolmap` or a user-installed COLMAP
-  executable for the default backend.
+- Providing one embedded native COLMAP sparse-SfM implementation.
 - Providing reports, visualizations, and package/build paths for users and
   developers.
 

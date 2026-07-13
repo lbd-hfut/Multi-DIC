@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Protocol
 
 
 class BackendUnavailableError(RuntimeError):
@@ -17,10 +16,3 @@ class SfmPaths:
     workspace: Path
     database_path: Path
     sparse_root: Path
-
-
-class ColmapBackend(Protocol):
-    name: str
-
-    def run(self, paths: SfmPaths, image_names: list[str], report: dict) -> list[dict]:
-        """Run SfM and return reconstruction summaries."""

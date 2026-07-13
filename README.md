@@ -38,15 +38,18 @@ small set of representative result files is stored under
 Additional copied outputs:
 
 - [docs/results/cylinderdic/sparse_scene.png](docs/results/cylinderdic/sparse_scene.png)
+- [docs/results/cylinderdic/camera_observations_2d.png](docs/results/cylinderdic/camera_observations_2d.png)
 - [docs/results/cylinderdic/camera_observations_3d.png](docs/results/cylinderdic/camera_observations_3d.png)
 - [docs/results/cylinderdic/recon3d_002.ply](docs/results/cylinderdic/recon3d_002.ply)
 - [docs/results/cylinderdic/recon3d_report.json](docs/results/cylinderdic/recon3d_report.json)
 - [docs/results/cylinderdic/pipeline_report.json](docs/results/cylinderdic/pipeline_report.json)
 
-The example is regenerated from `run.py` using the native COLMAP ring matcher
-and the `native_recon3d` backend. The current regenerated report registers all
-12 cameras in one SfM model, exports 3606 sparse points, and reconstructs 3548
-valid 3D displacement tracks for frame `002.bmp`.
+The published example report was regenerated with the embedded
+`native_colmap` sparse-source backend and the `native_recon3d` backend. The
+current report registers all 12 cameras in one SfM model, starts from 14403
+native sparse points, removes 36 spatial sparse-point outliers during product
+export, and reconstructs 12926 valid 3D displacement points for frame
+`002.bmp`. The SfM mean reprojection error is 0.109651 px.
 
 ## Install From PyPI
 
@@ -139,12 +142,21 @@ cmake -S native -B build/windows-native -G Ninja -DPYBIND11_FINDPYTHON=ON
 cmake --build build/windows-native
 ```
 
+The locally validated Windows build for the embedded COLMAP source port uses a
+dedicated `build/native-colmap-port` tree. From this repository root:
+
+```powershell
+cmd /c ""C:\01project\ncorr\.tools\vsbt\VC\Auxiliary\Build\vcvars64.bat" >nul && python -m cmake -S native -B build\native-colmap-port -G Ninja -DCMAKE_MAKE_PROGRAM=C:\Users\LBD\AppData\Roaming\Python\Python313\Scripts\ninja.exe -DCMAKE_BUILD_TYPE=Release -DPYBIND11_FINDPYTHON=OFF -Dpybind11_DIR=C:\Users\LBD\AppData\Roaming\Python\Python313\site-packages\pybind11\share\cmake\pybind11"
+cmd /c ""C:\01project\ncorr\.tools\vsbt\VC\Auxiliary\Build\vcvars64.bat" >nul && C:\Users\LBD\AppData\Roaming\Python\Python313\Scripts\ninja.exe -C build\native-colmap-port native_colmap -j 2"
+```
+
 Expected Windows outputs include:
 
 ```text
 build/windows-native/ncorr/ncorr_cli.exe
 build/windows-native/recon3d/native_recon3d*.pyd
 build/windows-native/colmap/native_colmap*.pyd
+build/native-colmap-port/colmap/native_colmap*.pyd
 ```
 
 After the native build, run the full example from the repository root:
@@ -153,34 +165,24 @@ After the native build, run the full example from the repository root:
 python run.py --config configs/MDIC.yaml
 ```
 
-`run.py` automatically prefers extensions from `build/wsl-native/colmap` and
-`build/wsl-native/recon3d`, so stale editable installs do not shadow the current
-checkout.
+`run.py` automatically prefers local build extensions, including
+`build/native-colmap-port/colmap`, before falling back to installed modules, so
+stale editable installs do not shadow the current checkout.
 
-The default SfM backend is `native_colmap`. It embeds the required CPU-only
-COLMAP code into a `native_colmap` pybind11 extension, so users do not need the
-`pycolmap` Python API or a separately downloaded `colmap` executable. The
-default matcher is `ring`, which imports a camera-order-aware pair list for the
-multi-camera CylinderDIC layout instead of using exhaustive all-pairs matching.
-This avoids unstable far-view matches on repeated speckle texture while still
-using COLMAP SIFT extraction, geometric verification, and incremental mapping.
+SfM always uses the embedded `native_colmap` extension in
+`native/colmap/src`. It runs the trimmed COLMAP CorrespondenceGraph,
+IncrementalMapper, IncrementalTriangulator, and local/global Ceres bundle
+adjustment sources. There is no runtime backend selection or executable
+fallback. The native mapper tries multiple initial-image pairs, scores complete
+models by registration count, per-camera observation counts, camera-center
+outliers, reprojection error, and 2D coverage, then exports only the selected
+model. Exported sparse points are additionally filtered by 3D spatial
+distribution before observations and figures are written. Model summaries,
+candidate diagnostics, sparse outlier filter statistics, and native backend
+capabilities are included in `sfm_report.json` and `pipeline_report.json`.
 
-The embedded build uses the bundled COLMAP source tree in
-`native/colmap/upstream` by default. To test a different upstream checkout, pass
-`-DMDIC_COLMAP_SOURCE_DIR=/path/to/colmap`. If the extension is built without an
-available source tree, the old external command runner is kept only as a
-development fallback. Enable it explicitly with
-`colmap.allow_external_executable: true`; otherwise `native_colmap` raises a
-clear backend-unavailable error instead of silently requiring users to install
-COLMAP. The previous `pycolmap` backend remains available as an optional
-fallback with `pip install .[pycolmap]` and `colmap.backend: pycolmap`.
-Model registration summaries and native backend capabilities are included in
-`sfm_report.json`.
-
-The maintained boundary is the narrow `native_colmap` API plus stable Multi-DIC
-output files. Project-specific logic belongs in `native/colmap`; the upstream
-COLMAP tree should stay structurally intact and be linked through
-`native/colmap/upstream` or an explicit `MDIC_COLMAP_SOURCE_DIR`.
+The maintained boundary is the narrow `native_colmap` API plus COLMAP text and
+Multi-DIC product files. Unused source trees are not shipped.
 
 ## Public API
 

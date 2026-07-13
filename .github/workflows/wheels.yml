@@ -33,19 +33,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-<<<<<<< HEAD
-
-=======
->>>>>>> b4263fcf4682d507a64beae68b2bc2216434a8fc
       - name: Set up MSVC
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64
-<<<<<<< HEAD
-
-=======
->>>>>>> b4263fcf4682d507a64beae68b2bc2216434a8fc
       - name: Install macOS COLMAP deps
         if: runner.os == 'macOS'
         run: |

@@ -227,6 +227,7 @@ case/**/ground_truth/
 
 # Native build outputs
 native/**/build*/
+native/colmap/.deps/
 
 # CMake / Ninja generated files when users build in custom folders
 CMakeCache.txt
@@ -255,3 +256,6 @@ Testing/
 _skbuild/
 *.dist-info/
 pip-wheel-metadata/
+
+# Local validation / scratch outputs
+tmp/
