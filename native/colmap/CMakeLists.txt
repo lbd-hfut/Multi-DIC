@@ -28,6 +28,22 @@ if(NOT TARGET SuiteSparse::CHOLMOD AND EXISTS "${MDIC_COLMAP_DEPS_DIR}/lib/cmake
   include("${MDIC_COLMAP_DEPS_DIR}/lib/cmake/CHOLMOD/CHOLMODTargets.cmake")
 endif()
 
+set(MDIC_COLMAP_CHOLMOD_TARGET "")
+foreach(_cholmod_target SuiteSparse::CHOLMOD SuiteSparse::CHOLMOD_static)
+  if(TARGET "${_cholmod_target}")
+    set(MDIC_COLMAP_CHOLMOD_TARGET "${_cholmod_target}")
+    break()
+  endif()
+endforeach()
+
+set(MDIC_COLMAP_SQLITE_TARGET "")
+foreach(_sqlite_target SQLite3::SQLite3 SQLite::SQLite3 unofficial::sqlite3::sqlite3)
+  if(TARGET "${_sqlite_target}")
+    set(MDIC_COLMAP_SQLITE_TARGET "${_sqlite_target}")
+    break()
+  endif()
+endforeach()
+
 set(COLMAP_PORT_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
 if(EXISTS "${COLMAP_PORT_SRC_DIR}/thirdparty/PoseLib/CMakeLists.txt" AND NOT TARGET PoseLib::PoseLib)
@@ -45,9 +61,9 @@ if(Eigen3_FOUND
    AND Ceres_FOUND
    AND TARGET glog::glog
    AND Boost_FOUND
-   AND TARGET SuiteSparse::CHOLMOD
+   AND MDIC_COLMAP_CHOLMOD_TARGET
    AND SQLite3_FOUND
-   AND TARGET SQLite3::SQLite3
+   AND MDIC_COLMAP_SQLITE_TARGET
    AND TARGET PoseLib::PoseLib
    AND EXISTS "${COLMAP_PORT_SRC_DIR}/colmap/sfm/incremental_mapper.cc")
   set(MDIC_COLMAP_SPARSE_READY ON)
@@ -168,8 +184,8 @@ if(MDIC_COLMAP_SPARSE_READY)
     Ceres::ceres
     glog::glog
     Boost::graph
-    SuiteSparse::CHOLMOD
-    SQLite3::SQLite3
+    "${MDIC_COLMAP_CHOLMOD_TARGET}"
+    "${MDIC_COLMAP_SQLITE_TARGET}"
     PoseLib::PoseLib)
   if(MSVC)
     target_compile_options(mdic_colmap_sparse PRIVATE /bigobj /W3 /permissive-)
