@@ -58,8 +58,9 @@ pip install pymultidic
 ```
 
 PyMultiDIC 2.x publishes native CPython 3.12 wheels for Windows x86_64 and
-Linux x86_64. Other Python versions and macOS do not currently have supported
-binary wheels.
+Linux x86_64 (`manylinux_2_39`, glibc 2.39 or newer). Other Python versions,
+older Linux distributions, and macOS do not currently have supported binary
+wheels.
 
 Then call the package from Python:
 

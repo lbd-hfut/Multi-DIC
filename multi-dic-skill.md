@@ -12,7 +12,8 @@ how to run and debug real experiment data when no ground truth is available.
   layouts unless the user explicitly asks for that.
 - The Python package surface is `pymultidic`.
 - PyMultiDIC 2.x publishes CPython 3.12 wheels for Windows x86_64 and Linux
-  x86_64. Other Python versions and macOS require an explicitly supported
+  x86_64 (`manylinux_2_39`, glibc 2.39 or newer). Other Python versions, older
+  Linux distributions, and macOS require an explicitly supported
   source-development setup.
 - The default SfM backend is `native_colmap`, a CPU-only embedded COLMAP
   adapter. It is the project's only SfM implementation.

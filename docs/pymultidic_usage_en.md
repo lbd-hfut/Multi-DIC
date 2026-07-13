@@ -59,9 +59,10 @@ python -m pip install -U pymultidic
 ```
 
 PyMultiDIC 2.x provides binary wheels for CPython 3.12 on Windows x86_64 and
-Linux x86_64. A supported wheel includes `native_colmap`, `native_recon3d`, and
-`ncorr_cli`; no local compiler is required. Other Python versions and macOS do
-not currently have supported binary wheels.
+Linux x86_64 (`manylinux_2_39`, glibc 2.39 or newer). A supported wheel includes
+`native_colmap`, `native_recon3d`, and `ncorr_cli`; no local compiler is
+required. Other Python versions, older Linux distributions, and macOS do not
+currently have supported binary wheels.
 
 Run a YAML-configured workflow:
 

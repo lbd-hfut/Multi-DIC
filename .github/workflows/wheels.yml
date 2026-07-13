@@ -75,7 +75,7 @@ jobs:
           path: wheelhouse/*.whl
   build-linux-wheel:
     name: Wheel on Linux x86_64
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -102,7 +102,7 @@ jobs:
           auditwheel show wheelhouse-raw/*.whl
           auditwheel repair wheelhouse-raw/*.whl \
             --wheel-dir wheelhouse \
-            --plat manylinux_2_35_x86_64
+            --plat manylinux_2_39_x86_64
       - name: Test repaired Linux wheel
         run: |
           python -m venv .wheel-test
